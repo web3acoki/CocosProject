@@ -1,0 +1,13 @@
+{
+  "name": "NewProject_1",
+  "uuid": "f6b4e57b-ee87-4328-8c7b-b9857f68d73f",
+  "creator": {
+    "version": "3.8.7"
+  },
+  "dependencies": {
+    "@telegram-apps/bridge": "^2.11.0",
+    "@telegram-apps/sdk": "^3.11.8",
+    "@twa-dev/sdk": "^8.0.2",
+    "crypto": "^1.0.1"
+  }
+}
