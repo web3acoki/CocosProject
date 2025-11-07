@@ -57,6 +57,8 @@ export class Menu extends Component {
     test1:Label=null;
     @property(Label)
     test2:Label=null;
+    @property(Label)
+    test3:Label=null;
     @property(EditBox)
     userIdInput:EditBox=null;
 
@@ -106,6 +108,12 @@ export class Menu extends Component {
     }
 
     update(deltaTime: number) {
+        if(Manager.initRequest.initData==null){
+            this.test3.string="null";
+        }
+        else{
+            this.test3.string=Manager.initRequest.initData;
+        }
         if(this.displayLoaded==false){
             if(Manager.loadFinish==4){
                 this.displayLoaded=true;
