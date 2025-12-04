@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Cocos Creator | XDiving</title>
+
+  <!--http://www.html5rocks.com/en/mobile/mobifying/-->
+  <meta name="viewport"
+        content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1,minimal-ui=true"/>
+
+  <!--https://developer.apple.com/library/safari/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- force webkit on 360 -->
+  <meta name="renderer" content="webkit"/>
+  <meta name="force-rendering" content="webkit"/>
+  <!-- force edge on IE -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <!-- force full screen on some browser -->
+  <meta name="full-screen" content="yes"/>
+  <meta name="x5-fullscreen" content="true"/>
+  <meta name="360-fullscreen" content="true"/>
+
+  <!--fix fireball/issues/3568 -->
+  <!--<meta name="browsermode" content="application">-->
+  <meta name="x5-page-mode" content="app">
+
+  <!--<link rel="apple-touch-icon" href=".png" />-->
+  <!--<link rel="apple-touch-icon-precomposed" href=".png" />-->
+
+  <link rel="stylesheet" type="text/css" href="style.f76d1.css"/>
+
+  <!-- TON Connect Manifest 文件会在构建时自动复制到根目录 -->
+  
+  
+  <!-- 确保 TON Connect Modal 在 Telegram Web App 中可见的样式 -->
+  <style>
+    /* 确保 TON Connect Modal 在 Telegram Web App 中有足够高的 z-index */
+    .tonconnect-modal,
+    [data-tonconnect-modal],
+    .tc-modal,
+    [class*="tonconnect-modal"],
+    [id*="tonconnect-modal"] {
+      z-index: 999999 !important;
+      position: fixed !important;
+    }
+    
+    /* 确保 modal 背景层也可见 */
+    .tonconnect-modal-backdrop,
+    [class*="backdrop"],
+    [class*="overlay"] {
+      z-index: 999998 !important;
+      position: fixed !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- TON Connect 按钮容器（可选，如果使用自动创建的按钮） -->
+  <div id="ton-connect-button-root" style="display: none;"></div>
+  
+  <div id="GameDiv" cc_exact_fit_screen="true">
+      <div id="Cocos3dGameContainer">
+        <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="99"></canvas>
+      </div>
+    </div>
+  
+
+<!-- Polyfills bundle. -->
+
+<script src="src/polyfills.bundle.399c4.js" charset="utf-8"> </script>
+
+
+<!-- SystemJS support. -->
+<script src="src/system.bundle.543e6.js" charset="utf-8"> </script>
+
+<!-- Import map -->
+<script src="src/import-map.999d3.json" type="systemjs-importmap" charset="utf-8"> </script>
+
+<script>
+    System.import('./index.a7583.js').catch(function(err) { console.error(err); })
+</script>
+
+</body>
+</html>
