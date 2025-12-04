@@ -191,10 +191,12 @@ export class Joystick extends Component {
    */
   _touchStartEvent(event: EventTouch) {
 
-    console.log(this.player.playerState);
+    //console.log(this.player.playerState);
     if (!this.ring || !this.dot) return;
 
-    if(this.player.playerState!=PlayerState.MOVE) return;
+    if(this.player.playerState==PlayerState.CATCH) return;
+    //if(this.player.playerState!=PlayerState.MOVE) return;
+    //if(this.player.playerState!=PlayerState.MOVE) return;
 
     instance.emit(SystemEventType.TOUCH_START, event);
 
@@ -230,6 +232,8 @@ export class Joystick extends Component {
    */
   _touchMoveEvent(event: EventTouch) {
     if (!this.dot || !this.ring) return;
+    
+    //if(this.player.playerState!=PlayerState.MOVE) return;
 
     // 如果 touch start 位置和 touch move 相同，禁止移动
     if (
@@ -270,6 +274,8 @@ export class Joystick extends Component {
    */
   _touchEndEvent(event: EventTouch) {
     if (!this.dot || !this.ring) return;
+
+    //if(this.player.playerState!=PlayerState.MOVE) return;
 
     this.dot.setPosition(new Vec3());
     if (this.joystickType === JoystickType.FOLLOW) {

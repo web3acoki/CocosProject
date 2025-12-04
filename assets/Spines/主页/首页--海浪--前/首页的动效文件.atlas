@@ -1,0 +1,41 @@
+
+首页的动效文件.png
+size: 1952,814
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+最上方的大白色
+  rotate: false
+  xy: 754, 2
+  size: 488, 56
+  orig: 488, 56
+  offset: 0, 0
+  index: -1
+最大浪下一层
+  rotate: true
+  xy: 1865, 62
+  size: 750, 85
+  orig: 752, 87
+  offset: 1, 1
+  index: -1
+最大的浪
+  rotate: false
+  xy: 2, 2
+  size: 750, 810
+  orig: 750, 879
+  offset: 0, 0
+  index: -1
+最底下的一层浪花
+  rotate: true
+  xy: 754, 60
+  size: 752, 580
+  orig: 752, 580
+  offset: 0, 0
+  index: -1
+浅色浪
+  rotate: true
+  xy: 1336, 60
+  size: 752, 527
+  orig: 752, 536
+  offset: 0, 0
+  index: -1

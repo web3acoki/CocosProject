@@ -7,6 +7,8 @@ export class ReferralContent extends Component {
     
     @property(Label)
     userId:Label=null;
+    @property(Label)
+    diamond:Label=null;
 
     start() {
 

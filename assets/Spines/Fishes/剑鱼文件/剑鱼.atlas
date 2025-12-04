@@ -1,0 +1,48 @@
+
+剑鱼.png
+size: 456,362
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+1
+  rotate: true
+  xy: 405, 50
+  size: 40, 26
+  orig: 42, 28
+  offset: 1, 1
+  index: -1
+2
+  rotate: true
+  xy: 427, 22
+  size: 26, 18
+  orig: 28, 20
+  offset: 1, 1
+  index: -1
+影子
+  rotate: false
+  xy: 2, 92
+  size: 452, 268
+  orig: 452, 268
+  offset: 0, 0
+  index: -1
+身体
+  rotate: false
+  xy: 2, 2
+  size: 298, 88
+  orig: 298, 88
+  offset: 0, 0
+  index: -1
+鱼翅
+  rotate: true
+  xy: 405, 5
+  size: 43, 20
+  orig: 45, 22
+  offset: 1, 1
+  index: -1
+鱼鳍
+  rotate: false
+  xy: 302, 31
+  size: 101, 59
+  orig: 101, 59
+  offset: 0, 0
+  index: -1

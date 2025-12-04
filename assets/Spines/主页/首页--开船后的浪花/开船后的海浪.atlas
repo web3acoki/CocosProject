@@ -1,0 +1,48 @@
+
+开船后的海浪.png
+size: 271,290
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+hailang
+  rotate: true
+  xy: 82, 67
+  size: 221, 109
+  orig: 226, 113
+  offset: 3, 2
+  index: -1
+图层 2
+  rotate: false
+  xy: 193, 110
+  size: 76, 80
+  orig: 80, 84
+  offset: 2, 2
+  index: -1
+图层 3
+  rotate: true
+  xy: 82, 10
+  size: 55, 94
+  orig: 59, 98
+  offset: 2, 2
+  index: -1
+图层 5
+  rotate: true
+  xy: 2, 2
+  size: 286, 78
+  orig: 290, 82
+  offset: 2, 2
+  index: -1
+图层 6
+  rotate: true
+  xy: 193, 65
+  size: 43, 54
+  orig: 47, 58
+  offset: 2, 2
+  index: -1
+图层 7
+  rotate: false
+  xy: 193, 192
+  size: 76, 96
+  orig: 80, 100
+  offset: 2, 2
+  index: -1

@@ -18,7 +18,10 @@ export class BoxContent extends Component {
     
     @property(Label)
     priceNumLabel :Label=null;
-    
+
+    @property(Label)
+    rarityLabel :Label=null;
+
     @property(Node)
     diamondSprite :Node=null;
     

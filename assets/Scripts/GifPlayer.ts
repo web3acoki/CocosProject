@@ -7,9 +7,12 @@ export class GifPlayer extends Component {
 
     @property([SpriteFrame])
     spriteFrames: SpriteFrame[] = [];
-    private sprite: Sprite = null;
-    speed=0.05;
+    sprite: Sprite = null;
 
+    @property([Number])
+    speed:number=0.05;
+    
+    public index = 0;
     protected start(): void {
 
         //let spriteFolder: string = "主页内容/序列帧/" + this.node.name;
@@ -22,11 +25,10 @@ export class GifPlayer extends Component {
         //});
 
         this.sprite = this.getComponent(Sprite);
-        let index = 0;
         this.schedule(() => {
             if (this.spriteFrames.length > 0) {
-                this.sprite.spriteFrame = this.spriteFrames[index];
-                index = (index + 1) % this.spriteFrames.length;
+                this.sprite.spriteFrame = this.spriteFrames[this.index];
+                this.index = (this.index + 1) % this.spriteFrames.length;
             }
         }, this.speed);
     }

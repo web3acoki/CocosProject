@@ -1,0 +1,55 @@
+
+灯笼鱼.png
+size: 61,78
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+图层 12
+  rotate: true
+  xy: 41, 61
+  size: 15, 18
+  orig: 15, 18
+  offset: 0, 0
+  index: -1
+图层 14
+  rotate: true
+  xy: 2, 2
+  size: 74, 37
+  orig: 74, 37
+  offset: 0, 0
+  index: -1
+图层 6
+  rotate: false
+  xy: 41, 19
+  size: 11, 9
+  orig: 97, 65
+  offset: 10, 47
+  index: -1
+图层 8
+  rotate: true
+  xy: 41, 6
+  size: 11, 8
+  orig: 11, 8
+  offset: 0, 0
+  index: -1
+图层 9
+  rotate: false
+  xy: 41, 46
+  size: 17, 13
+  orig: 17, 13
+  offset: 0, 0
+  index: -1
+影子
+  rotate: false
+  xy: 51, 6
+  size: 7, 11
+  orig: 7, 11
+  offset: 0, 0
+  index: -1
+鱼翅
+  rotate: true
+  xy: 41, 30
+  size: 14, 15
+  orig: 14, 15
+  offset: 0, 0
+  index: -1

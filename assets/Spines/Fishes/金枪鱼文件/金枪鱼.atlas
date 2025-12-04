@@ -1,0 +1,48 @@
+
+金枪鱼.png
+size: 147,75
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+上1.1
+  rotate: false
+  xy: 119, 10
+  size: 12, 12
+  orig: 14, 14
+  offset: 1, 1
+  index: -1
+上前
+  rotate: true
+  xy: 119, 24
+  size: 23, 16
+  orig: 23, 16
+  offset: 0, 0
+  index: -1
+下
+  rotate: true
+  xy: 137, 34
+  size: 13, 8
+  orig: 15, 10
+  offset: 1, 1
+  index: -1
+下1.2
+  rotate: true
+  xy: 133, 7
+  size: 15, 9
+  orig: 17, 11
+  offset: 1, 1
+  index: -1
+图层 6
+  rotate: false
+  xy: 2, 2
+  size: 115, 71
+  orig: 115, 71
+  offset: 0, 0
+  index: -1
+鱼翅
+  rotate: true
+  xy: 119, 49
+  size: 24, 17
+  orig: 24, 17
+  offset: 0, 0
+  index: -1

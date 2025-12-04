@@ -1,0 +1,34 @@
+
+鲸鲨.png
+size: 509,132
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+图层 2 拷贝
+  rotate: false
+  xy: 2, 2
+  size: 410, 128
+  orig: 410, 149
+  offset: 0, 21
+  index: -1
+图层 4
+  rotate: true
+  xy: 414, 32
+  size: 98, 51
+  orig: 98, 51
+  offset: 0, 0
+  index: -1
+图层 5
+  rotate: true
+  xy: 467, 79
+  size: 51, 40
+  orig: 53, 42
+  offset: 1, 1
+  index: -1
+图层 6
+  rotate: false
+  xy: 414, 6
+  size: 42, 24
+  orig: 44, 26
+  offset: 1, 1
+  index: -1

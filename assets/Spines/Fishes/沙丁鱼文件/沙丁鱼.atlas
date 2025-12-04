@@ -1,0 +1,41 @@
+
+沙丁鱼.png
+size: 41,194
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+下方前面
+  rotate: false
+  xy: 2, 181
+  size: 14, 11
+  orig: 14, 11
+  offset: 0, 0
+  index: -1
+下方后面
+  rotate: false
+  xy: 18, 181
+  size: 21, 11
+  orig: 21, 11
+  offset: 0, 0
+  index: -1
+图层 1
+  rotate: true
+  xy: 2, 2
+  size: 147, 37
+  orig: 147, 38
+  offset: 0, 1
+  index: -1
+图层 3
+  rotate: false
+  xy: 2, 151
+  size: 29, 14
+  orig: 29, 14
+  offset: 0, 0
+  index: -1
+背上
+  rotate: false
+  xy: 2, 167
+  size: 23, 12
+  orig: 23, 12
+  offset: 0, 0
+  index: -1

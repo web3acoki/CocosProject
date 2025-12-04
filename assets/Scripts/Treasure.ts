@@ -15,15 +15,7 @@ export class Treasure extends Component {
     opened:Node=null;
 
     openTimer=0.45;
-
-    open(){
-        this.close.active=false;
-        this.opening.active=true;
-    }
-    start() {
-
-    }
-
+    
     update(deltaTime: number) {
         if(this.opening.active){
             if(this.openTimer>0){

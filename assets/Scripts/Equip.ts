@@ -2,6 +2,8 @@ import { _decorator, AudioSource, color, Component, director, equals, instantiat
 import { Manager } from './Manager';
 import { BoxContent } from './BoxContent';
 import { EquipContent } from './EquipContent';
+import { Sound } from './Sound';
+import { GeneralUI } from './GeneralUI';
 const { ccclass, property } = _decorator;
 
 @ccclass('Equip')
@@ -55,6 +57,9 @@ export class Equip extends Component {
     //@property(Label)
     //diamondNumLabel:Label=null;
 
+    @property(GeneralUI)
+    generalUI:GeneralUI=null;
+
     @property(EquipContent)
     harpoonContent:EquipContent=null;
 
@@ -64,52 +69,46 @@ export class Equip extends Component {
     @property(EquipContent)
     boxContent:EquipContent=null;
 
-    @property(AudioSource)//音效
-    buttonAudio:AudioSource=null;
+    //@property(AudioSource)//音效
+    //buttonAudio:AudioSource=null;
 
-    @property(Label)
-    userCoins: Label = null;
-    @property(Label)
-    userDiamonds: Label = null;
+    //@property(Label)
+    //userCoins: Label = null;
+    //@property(Label)
+    //userDiamonds: Label = null;
 
     harpoonEnough=true;
     tankEnough=true;
     boxEnough=true;
 
     start() {
-        //Manager.getInstance().post(url,
-        //   Manager.startData,
-        //   (data) => {
-        //     console.log('鱼箱数据:', data);
-        //     console.log(Manager.startData);
-        //     },
-        //     (error) => {
-        //         console.log(`'鱼箱数据POST失败: ${error}`);
-        //     }
-        //   )
         this.updateHarpoon();
         this.updateBox();
         this.updateTank();
         this.updateDataDisplay();
-        //let userID=1;
-        //let url="https://api.xdiving.io/api/fish-catch/user/"+userID.toString()+"/box";
-
-        //Manager.getInstance().get(url,
-        //  (data) => {
-        //    console.log('鱼箱数据:', data);
-        //    Manager.boxData = data;
-        //    console.log(Manager.boxData);
-        //    this.initBox();
-        //    },
-        //    (error) => {
-        //    console.log(`鱼箱GET失败: ${error}`);
-        //  }
-        //)
+        director.preloadScene("Menu");
+        //this.updateSound();
     }
+    //@property(AudioSource)
+    //BGM:AudioSource=null;
+        //
+    //updateSound(){
+    //    if(Manager.userData.data.BGMopen){
+    //        this.BGM.volume=1;
+    //    }
+    //    else{
+    //        this.BGM.volume=0;
+    //    }
+    //    if(Manager.userData.data.BGSopen){
+    //        this.buttonAudio.volume=1;
+    //    }
+    //    else{
+    //        this.buttonAudio.volume=0;
+    //    }
+    //}
 
     updateDataDisplay(){
-        this.userCoins.string=Manager.userData.data.coins.toString();
-        this.userDiamonds.string=Manager.userData.data.diamonds.toString();
+        this.generalUI.updateDisplay();
         if(Manager.userData.data.coins<Manager.harpoons[Manager.equipmentData.data[0].level-1].cost){
             this.harpoonContent.costLabel.color=color(255,0,0);
             this.harpoonEnough=false;
@@ -127,7 +126,23 @@ export class Equip extends Component {
 
     upgradePost(){
 
-        this.buttonAudio.play();
+        this.updateDataDisplay();
+        if(Manager.questData.data[1].questStatus==1){
+            Manager.questData.data[1].questStatus=3;
+            Manager.questData.data[1].progress++;
+            const questData = { identifier: 9007};
+            Manager.getInstance().post('https://api.xdiving.io/api/quest/user/progress',
+            questData,
+            (data) => {
+                console.log('任务更新:', data);
+                console.log(questData);
+            },
+            (error) => {
+                console.log(`任务更新失败: ${error}`);
+            })
+        }
+        
+        Sound.instance.buttonAudio.play();
         console.log(Manager.sellFishData);
         Manager.getInstance().post('https://api.xdiving.io/api/equipment/user/'+Manager.userData.data.userId.toString()+'/upgrade',
         Manager.upgradeData,
@@ -144,19 +159,17 @@ export class Equip extends Component {
     upgradeHarpoon(){
         if(this.harpoonEnough){
             
-            this.buttonAudio.play();
+            Sound.instance.buttonAudio.play();
             Manager.upgradeData.equipmentId=1;
             Manager.userData.data.coins-=Manager.harpoons[Manager.equipmentData.data[0].level-1].cost;
             Manager.equipmentData.data[0].level++;
-            this.upgradePost();
             this.updateHarpoon();
+            this.upgradePost();
             
-            this.updateDataDisplay();
         }
     }
 
     updateHarpoon(){
-        
         let level=Manager.equipmentData.data[0].level;
         let harpoon=Manager.harpoons[level-1];
         this.harpoonContent.curLabel.string="Lv."+level+" Deals "+harpoon.attribute+" damage to fish";
@@ -175,14 +188,12 @@ export class Equip extends Component {
     
     upgradeTank(){
         if(this.tankEnough){
-            this.buttonAudio.play();
+            Sound.instance.buttonAudio.play();
             Manager.upgradeData.equipmentId=2;
             Manager.userData.data.coins-=Manager.tanks[Manager.equipmentData.data[1].level-1].cost;
             Manager.equipmentData.data[1].level++;
-            this.upgradePost();
             this.updateTank();
-            
-            this.updateDataDisplay();
+            this.upgradePost();
         }
     }
 
@@ -205,13 +216,12 @@ export class Equip extends Component {
 
     upgradeBox(){
         if(this.boxEnough){
-            this.buttonAudio.play();
+            Sound.instance.buttonAudio.play();
             Manager.upgradeData.equipmentId=3;
             Manager.userData.data.coins-=Manager.boxs[Manager.equipmentData.data[2].level-1].cost;
             Manager.equipmentData.data[2].level++;
-            this.upgradePost();
             this.updateBox();
-            this.updateDataDisplay();
+            this.upgradePost();
         }
     }
 
@@ -233,7 +243,7 @@ export class Equip extends Component {
 
 
     back(){
-        this.buttonAudio.play();
+        Sound.instance.buttonAudio.play();
         director.loadScene("Menu");
     }
 

@@ -1,0 +1,41 @@
+
+月亮鱼.png
+size: 131,133
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+上
+  rotate: true
+  xy: 85, 71
+  size: 60, 44
+  orig: 60, 44
+  offset: 0, 0
+  index: -1
+下
+  rotate: false
+  xy: 85, 34
+  size: 37, 35
+  orig: 37, 35
+  offset: 0, 0
+  index: -1
+中
+  rotate: false
+  xy: 85, 12
+  size: 23, 20
+  orig: 26, 22
+  offset: 1, 1
+  index: -1
+本体
+  rotate: true
+  xy: 2, 2
+  size: 129, 81
+  orig: 129, 81
+  offset: 0, 0
+  index: -1
+鱼翅
+  rotate: true
+  xy: 110, 7
+  size: 25, 18
+  orig: 27, 20
+  offset: 1, 1
+  index: -1

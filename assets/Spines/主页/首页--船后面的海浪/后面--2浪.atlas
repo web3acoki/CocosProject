@@ -1,0 +1,20 @@
+
+后面--2浪.png
+size: 1122,756
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+最底下的一层浪花
+  rotate: true
+  xy: 2, 3
+  size: 751, 580
+  orig: 752, 580
+  offset: 0, 0
+  index: -1
+浅色浪
+  rotate: true
+  xy: 584, 2
+  size: 752, 536
+  orig: 752, 536
+  offset: 0, 0
+  index: -1

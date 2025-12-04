@@ -1,0 +1,41 @@
+
+魔鬼鱼.png
+size: 86,145
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+上面鱼翅--大
+  rotate: true
+  xy: 36, 78
+  size: 65, 48
+  orig: 66, 51
+  offset: 0, 3
+  index: -1
+上面鱼翅--小
+  rotate: false
+  xy: 36, 2
+  size: 25, 28
+  orig: 27, 30
+  offset: 1, 1
+  index: -1
+下面的翅膀--大
+  rotate: false
+  xy: 36, 32
+  size: 48, 44
+  orig: 66, 44
+  offset: 0, 0
+  index: -1
+下面的翅膀--小
+  rotate: false
+  xy: 63, 10
+  size: 21, 20
+  orig: 23, 22
+  offset: 1, 1
+  index: -1
+飞下
+  rotate: true
+  xy: 2, 3
+  size: 140, 32
+  orig: 140, 32
+  offset: 0, 0
+  index: -1

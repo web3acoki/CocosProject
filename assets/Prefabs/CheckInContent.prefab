@@ -83,7 +83,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "签到天数框",
+    "_name": "不可用",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -362,7 +362,7 @@
       "__id__": 1
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 15
@@ -893,7 +893,7 @@
       "__id__": 37
     },
     "received": {
-      "__id__": 20
+      "__id__": 14
     },
     "frame": {
       "__id__": 2
@@ -903,6 +903,9 @@
     },
     "rewardLabel": {
       "__id__": 29
+    },
+    "button": {
+      "__id__": 38
     },
     "menu": null,
     "day": 1,
@@ -929,7 +932,7 @@
         "__id__": 40
       }
     ],
-    "_interactable": true,
+    "_interactable": false,
     "_transition": 3,
     "_normalColor": {
       "__type__": "cc.Color",
@@ -965,7 +968,9 @@
     "_disabledSprite": null,
     "_duration": 0.1,
     "_zoomScale": 1.2,
-    "_target": null,
+    "_target": {
+      "__id__": 1
+    },
     "_id": ""
   },
   {

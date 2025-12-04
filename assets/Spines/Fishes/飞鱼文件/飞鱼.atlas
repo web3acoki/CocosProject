@@ -1,0 +1,48 @@
+
+飞鱼.png
+size: 109,75
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+图层 4 拷贝 3
+  rotate: false
+  xy: 2, 42
+  size: 105, 31
+  orig: 105, 36
+  offset: 0, 5
+  index: -1
+图层 5
+  rotate: true
+  xy: 2, 2
+  size: 38, 43
+  orig: 38, 43
+  offset: 0, 0
+  index: -1
+图层 6
+  rotate: true
+  xy: 79, 3
+  size: 21, 12
+  orig: 21, 12
+  offset: 0, 0
+  index: -1
+图层 7
+  rotate: true
+  xy: 93, 8
+  size: 16, 11
+  orig: 16, 11
+  offset: 0, 0
+  index: -1
+图层 8
+  rotate: false
+  xy: 79, 26
+  size: 22, 14
+  orig: 22, 14
+  offset: 0, 0
+  index: -1
+图层 9
+  rotate: true
+  xy: 47, 6
+  size: 34, 30
+  orig: 35, 30
+  offset: 1, 0
+  index: -1

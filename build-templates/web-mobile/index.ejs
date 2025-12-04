@@ -36,8 +36,126 @@
 
   <link rel="stylesheet" type="text/css" href="<%= cssUrl %>"/>
 
+  <!-- TON Connect Manifest 文件会在构建时自动复制到根目录 -->
+  <%
+  // 构建时自动复制 tonconnect-manifest.json 到构建输出目录
+  // 这段代码在模板渲染时执行（构建时）
+  // 注意：构建时，此模板文件会被复制到构建输出目录，所以 __dirname 指向构建输出目录
+  try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // 获取构建输出目录
+      // 方法1: 使用 buildPath（如果 Cocos Creator 提供了）
+      let buildOutputDir;
+      if (typeof buildPath !== 'undefined' && buildPath) {
+          buildOutputDir = buildPath;
+      } else if (typeof dest !== 'undefined' && dest) {
+          // 方法2: 使用 dest（构建目标目录）
+          buildOutputDir = dest;
+      } else {
+          // 方法3: 使用当前工作目录（构建时通常是构建输出目录）
+          buildOutputDir = process.cwd();
+      }
+      
+      // 查找项目根目录（从构建输出目录向上查找）
+      function findProjectRoot(startDir) {
+          let currentDir = path.resolve(startDir);
+          const root = path.parse(currentDir).root;
+          let depth = 0;
+          while (currentDir !== root && depth < 10) {
+              const manifestPath = path.join(currentDir, 'assets', 'Scripts', 'Test', 'tonconnect-manifest.json');
+              if (fs.existsSync(manifestPath)) {
+                  return currentDir;
+              }
+              const parentDir = path.dirname(currentDir);
+              if (parentDir === currentDir) break;
+              currentDir = parentDir;
+              depth++;
+          }
+          return null;
+      }
+      
+      // 尝试多个可能的项目根目录位置
+      const possibleRoots = [
+          buildOutputDir,
+          path.join(buildOutputDir, '..'),
+          path.join(buildOutputDir, '..', '..'),
+          process.cwd(),
+          path.join(process.cwd(), '..'),
+          path.join(process.cwd(), '..', '..'),
+      ];
+      
+      let projectRoot = null;
+      for (const possibleRoot of possibleRoots) {
+          try {
+              const found = findProjectRoot(possibleRoot);
+              if (found) {
+                  projectRoot = found;
+                  break;
+              }
+          } catch (e) {
+              // 忽略单个路径的错误，继续尝试下一个
+          }
+      }
+      
+      if (projectRoot) {
+          const sourceFile = path.join(projectRoot, 'assets', 'Scripts', 'Test', 'tonconnect-manifest.json');
+          const targetFile = path.join(buildOutputDir, 'tonconnect-manifest.json');
+          
+          if (fs.existsSync(sourceFile)) {
+              // 确保目标目录存在
+              const targetDir = path.dirname(targetFile);
+              if (!fs.existsSync(targetDir)) {
+                  fs.mkdirSync(targetDir, { recursive: true });
+              }
+              
+              // 复制文件
+              fs.copyFileSync(sourceFile, targetFile);
+              console.log('[构建模板] ✅ tonconnect-manifest.json 已自动复制到构建输出目录');
+              console.log('[构建模板]   源文件:', sourceFile);
+              console.log('[构建模板]   目标文件:', targetFile);
+          } else {
+              console.warn('[构建模板] ⚠️ 源文件不存在:', sourceFile);
+          }
+      } else {
+          console.warn('[构建模板] ⚠️ 无法找到项目根目录，跳过 manifest 文件复制');
+          console.warn('[构建模板]   构建输出目录:', buildOutputDir);
+      }
+  } catch (e) {
+      // 静默失败，不影响构建过程
+      console.warn('[构建模板] ⚠️ 自动复制 tonconnect-manifest.json 失败:', e.message);
+      if (e.stack) {
+          console.warn('[构建模板]   错误堆栈:', e.stack);
+      }
+  }
+  %>
+  
+  <!-- 确保 TON Connect Modal 在 Telegram Web App 中可见的样式 -->
+  <style>
+    /* 确保 TON Connect Modal 在 Telegram Web App 中有足够高的 z-index */
+    .tonconnect-modal,
+    [data-tonconnect-modal],
+    .tc-modal,
+    [class*="tonconnect-modal"],
+    [id*="tonconnect-modal"] {
+      z-index: 999999 !important;
+      position: fixed !important;
+    }
+    
+    /* 确保 modal 背景层也可见 */
+    .tonconnect-modal-backdrop,
+    [class*="backdrop"],
+    [class*="overlay"] {
+      z-index: 999998 !important;
+      position: fixed !important;
+    }
+  </style>
 </head>
 <body>
+  <!-- TON Connect 按钮容器（可选，如果使用自动创建的按钮） -->
+  <div id="ton-connect-button-root" style="display: none;"></div>
+  
   <div id="GameDiv" cc_exact_fit_screen="true">
       <div id="Cocos3dGameContainer">
         <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="99"></canvas>

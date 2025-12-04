@@ -1,0 +1,132 @@
+
+小人--岸上行走.png
+size: 369,94
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+图层 1
+  rotate: true
+  xy: 113, 3
+  size: 17, 42
+  orig: 20, 44
+  offset: 1, 1
+  index: -1
+图层 10
+  rotate: false
+  xy: 334, 2
+  size: 12, 13
+  orig: 14, 15
+  offset: 1, 1
+  index: -1
+图层 11
+  rotate: true
+  xy: 157, 3
+  size: 25, 46
+  orig: 27, 48
+  offset: 1, 1
+  index: -1
+图层 12
+  rotate: false
+  xy: 334, 17
+  size: 11, 24
+  orig: 13, 26
+  offset: 1, 1
+  index: -1
+图层 124 拷贝 2
+  rotate: false
+  xy: 151, 30
+  size: 37, 62
+  orig: 37, 62
+  offset: 0, 0
+  index: -1
+图层 13
+  rotate: false
+  xy: 190, 32
+  size: 23, 60
+  orig: 25, 62
+  offset: 1, 1
+  index: -1
+图层 14
+  rotate: false
+  xy: 2, 3
+  size: 109, 89
+  orig: 111, 89
+  offset: 1, 0
+  index: -1
+图层 15
+  rotate: true
+  xy: 348, 10
+  size: 40, 19
+  orig: 42, 21
+  offset: 1, 1
+  index: -1
+图层 16
+  rotate: false
+  xy: 253, 6
+  size: 52, 30
+  orig: 55, 32
+  offset: 2, 1
+  index: -1
+图层 2
+  rotate: false
+  xy: 113, 22
+  size: 36, 70
+  orig: 38, 72
+  offset: 1, 1
+  index: -1
+图层 3
+  rotate: true
+  xy: 205, 6
+  size: 24, 46
+  orig: 26, 48
+  offset: 1, 1
+  index: -1
+图层 4
+  rotate: true
+  xy: 321, 5
+  size: 36, 11
+  orig: 38, 13
+  offset: 1, 1
+  index: -1
+图层 144 拷贝
+  rotate: true
+  xy: 321, 5
+  size: 36, 11
+  orig: 38, 13
+  offset: 1, 1
+  index: -1
+图层 5
+  rotate: false
+  xy: 341, 52
+  size: 19, 40
+  orig: 21, 42
+  offset: 1, 1
+  index: -1
+图层 6
+  rotate: false
+  xy: 263, 43
+  size: 38, 49
+  orig: 40, 51
+  offset: 1, 1
+  index: -1
+图层 7
+  rotate: true
+  xy: 303, 43
+  size: 49, 36
+  orig: 51, 38
+  offset: 1, 1
+  index: -1
+图层 8
+  rotate: false
+  xy: 215, 38
+  size: 46, 54
+  orig: 48, 56
+  offset: 1, 1
+  index: -1
+图层 9
+  rotate: true
+  xy: 307, 3
+  size: 38, 12
+  orig: 40, 14
+  offset: 1, 1
+  index: -1

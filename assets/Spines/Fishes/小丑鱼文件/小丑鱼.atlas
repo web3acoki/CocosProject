@@ -1,0 +1,48 @@
+
+小丑鱼.png
+size: 135,35
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+上
+  rotate: false
+  xy: 78, 16
+  size: 36, 17
+  orig: 36, 17
+  offset: 0, 0
+  index: -1
+下、前
+  rotate: false
+  xy: 94, 5
+  size: 14, 9
+  orig: 14, 9
+  offset: 0, 0
+  index: -1
+下、后
+  rotate: false
+  xy: 116, 21
+  size: 17, 12
+  orig: 18, 12
+  offset: 1, 0
+  index: -1
+图层 2
+  rotate: false
+  xy: 2, 2
+  size: 74, 31
+  orig: 74, 31
+  offset: 0, 0
+  index: -1
+图层 3
+  rotate: false
+  xy: 116, 6
+  size: 14, 13
+  orig: 14, 13
+  offset: 0, 0
+  index: -1
+影子
+  rotate: false
+  xy: 78, 3
+  size: 14, 11
+  orig: 14, 11
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,27 @@
+
+小人--岸上待机.png
+size: 209,127
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+1
+  rotate: true
+  xy: 2, 2
+  size: 123, 167
+  orig: 123, 167
+  offset: 0, 0
+  index: -1
+图层 13
+  rotate: false
+  xy: 171, 14
+  size: 23, 60
+  orig: 25, 62
+  offset: 1, 1
+  index: -1
+图层 7
+  rotate: true
+  xy: 171, 76
+  size: 49, 36
+  orig: 51, 38
+  offset: 1, 1
+  index: -1

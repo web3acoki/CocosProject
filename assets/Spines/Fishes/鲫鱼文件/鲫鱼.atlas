@@ -1,0 +1,41 @@
+
+鲫鱼.png
+size: 148,39
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+图层 2
+  rotate: true
+  xy: 125, 2
+  size: 16, 10
+  orig: 16, 10
+  offset: 0, 0
+  index: -1
+图层 3
+  rotate: true
+  xy: 106, 3
+  size: 34, 17
+  orig: 35, 17
+  offset: 1, 0
+  index: -1
+图层 4
+  rotate: false
+  xy: 2, 2
+  size: 102, 35
+  orig: 102, 35
+  offset: 0, 0
+  index: -1
+图层 5
+  rotate: true
+  xy: 125, 20
+  size: 17, 11
+  orig: 17, 11
+  offset: 0, 0
+  index: -1
+图层 6
+  rotate: true
+  xy: 137, 7
+  size: 11, 9
+  orig: 11, 9
+  offset: 0, 0
+  index: -1

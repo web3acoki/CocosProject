@@ -272,7 +272,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 155.72265625,
+      "width": 19.46533203125,
       "height": 63
     },
     "_anchorPoint": {
@@ -308,7 +308,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "25988971",
+    "_string": "1",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 35,
@@ -603,7 +603,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "+1",
+    "_string": "+0",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 35,
@@ -704,6 +704,9 @@
     },
     "userId": {
       "__id__": 11
+    },
+    "diamond": {
+      "__id__": 23
     },
     "_id": ""
   },

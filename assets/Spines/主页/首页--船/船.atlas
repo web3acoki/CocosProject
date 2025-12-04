@@ -1,0 +1,62 @@
+
+船.png
+size: 1128,458
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+下降
+  rotate: false
+  xy: 777, 140
+  size: 268, 147
+  orig: 270, 149
+  offset: 1, 1
+  index: -1
+前面
+  rotate: false
+  xy: 559, 289
+  size: 555, 167
+  orig: 557, 170
+  offset: 1, 1
+  index: -1
+升
+  rotate: false
+  xy: 559, 6
+  size: 216, 281
+  orig: 218, 283
+  offset: 1, 1
+  index: -1
+图层 4
+  rotate: false
+  xy: 1047, 148
+  size: 23, 23
+  orig: 25, 25
+  offset: 1, 1
+  index: -1
+图层 5
+  rotate: true
+  xy: 1047, 173
+  size: 114, 79
+  orig: 117, 82
+  offset: 1, 2
+  index: -1
+绳 右
+  rotate: true
+  xy: 777, 52
+  size: 86, 276
+  orig: 89, 280
+  offset: 2, 2
+  index: -1
+绳子
+  rotate: true
+  xy: 777, 14
+  size: 36, 302
+  orig: 38, 304
+  offset: 1, 1
+  index: -1
+船
+  rotate: false
+  xy: 2, 2
+  size: 555, 454
+  orig: 557, 456
+  offset: 1, 1
+  index: -1

@@ -1,18 +1,23 @@
-import { _decorator, AudioSource, Component, director, instantiate, Label, Node, Prefab, SpriteFrame } from 'cc';
+import { _decorator, AudioSource, color, Component, director, instantiate, Label, Node, Prefab, SpriteFrame } from 'cc';
 import { Manager } from './Manager';
 import { BoxContent } from './BoxContent';
+import { Sound } from './Sound';
+import { GeneralUI } from './GeneralUI';
 const { ccclass, property } = _decorator;
 
 @ccclass('Box')
 export class Box extends Component {
     
+    @property(GeneralUI)
+    generalUI:GeneralUI=null;
+
     @property(Node)
     contentNode: Node = null;
 
     //@property([Prefab])
     //boxContentPrefabs: Prefab;
 
-    @property([Prefab])
+    @property(Prefab)
     boxContentPrefab: Prefab=null;
 
     @property(Node)
@@ -24,17 +29,16 @@ export class Box extends Component {
     @property(Label)
     diamondNumLabel:Label=null;
 
-    @property(SpriteFrame)
+    @property([SpriteFrame])
     spriteFrames:SpriteFrame[]=[];
 
-    @property(AudioSource)//音效
-    buttonAudio:AudioSource=null;
+    //@property(AudioSource)//音效
+    //buttonAudio:AudioSource=null;
 
-    
-    @property(Label)
-    userCoins: Label = null;
-    @property(Label)
-    userDiamonds: Label = null;
+    //@property(Label)
+    //userCoins: Label = null;
+    //@property(Label)
+    //userDiamonds: Label = null;
 
     boxContents: BoxContent[]=[];
 
@@ -52,6 +56,11 @@ export class Box extends Component {
         //         console.log(`'鱼箱数据POST失败: ${error}`);
         //     }
         //   )
+        
+        Sound.instance.moveAudio.stop();
+        Sound.instance.stayAudio.stop();
+        Sound.instance.boostAudio.stop();
+        director.preloadScene("Menu");
         this.initBox();
         //let userID=1;
         //let url="https://api.xdiving.io/api/fish-catch/user/"+userID.toString()+"/box";
@@ -67,11 +76,30 @@ export class Box extends Component {
         //    console.log(`鱼箱GET失败: ${error}`);
         //  }
         //)
+        //this.updateSound();
     }
     
+    
+    //@property(AudioSource)
+    //BGM:AudioSource=null;
+    //
+    //updateSound(){
+    //    if(Manager.userData.data.BGMopen){
+    //        this.BGM.volume=1;
+    //    }
+    //    else{
+    //        this.BGM.volume=0;
+    //    }
+    //    if(Manager.userData.data.BGSopen){
+    //        Sound.instance.buttonAudio.volume=1;
+    //    }
+    //    else{
+    //        Sound.instance.buttonAudio.volume=0;
+    //    }
+    //}
+    
     updateDataDisplay(){
-        this.userCoins.string=Manager.userData.data.coins.toString();
-        this.userDiamonds.string=Manager.userData.data.diamonds.toString();
+        this.generalUI.updateDisplay();
     }
 
     initBox(){
@@ -88,6 +116,14 @@ export class Box extends Component {
                     contentComponent.sprite.spriteFrame=this.spriteFrames[i];
                 }
             }
+            
+            for(let i=0;i<Manager.rarityBaseData.data.length;i++){
+                if(contentData.rarity==Manager.rarityBaseData.data[i].rarity){
+                    contentComponent.rarityLabel.string=Manager.rarityBaseData.data[i].rarity;
+                    contentComponent.rarityLabel.outlineColor=color(Manager.rarityBaseData.data[i].color);
+                    contentComponent.rarityLabel.node.setScale(Manager.rarityBaseData.data[i].size, Manager.rarityBaseData.data[i].size, 1);
+                }
+            }
 
             contentComponent.box=this;
             contentComponent.identifier=contentData.identifiers;
@@ -95,7 +131,6 @@ export class Box extends Component {
             contentComponent.weightNumLabel.string=contentData.weight.toFixed(2);
             contentComponent.priceNumLabel.string=contentData.price.toString();
             
-
             if(contentData.type=="diamonds"){
                 contentComponent.diamondSprite.active=true;
                 contentComponent.goldSprite.active=false;
@@ -114,7 +149,7 @@ export class Box extends Component {
     }
 
     select(boxContent){
-        this.buttonAudio.play();
+        Sound.instance.buttonAudio.play();
         if(boxContent.selecting==true){
             boxContent.selecting=false;
             boxContent.selectNode.active=false;
@@ -130,7 +165,7 @@ export class Box extends Component {
     }
 
     selectAll(){
-        this.buttonAudio.play();
+        Sound.instance.buttonAudio.play();
         if(this.selectAllNode.active==true){
             this.selectAllNode.active=false;
             for(const boxContent of this.boxContents){
@@ -158,7 +193,7 @@ export class Box extends Component {
     }
 
     sell(){
-        this.buttonAudio.play();
+        Sound.instance.buttonAudio.play();
         this.coinNumLabel.string="+0";
         this.diamondNumLabel.string="+0";
         this.selectAllNode.active=false;
@@ -177,22 +212,22 @@ export class Box extends Component {
                 this.boxContents.splice(i, 1); 
             }
         }
-
-        console.log(Manager.sellFishData);
-        Manager.getInstance().post('https://api.xdiving.io/api/fish-catch/unified-sell',
-        Manager.sellFishData,
-        (data) => {
-          console.log('卖鱼数据:', data);
-          console.log(Manager.sellFishData);
-          },
-          (error) => {
-              console.log(`卖鱼数据POST失败: ${error}`);
-          }
-        )
+        if(Manager.sellFishData.identifiers.length>0){
+            Manager.getInstance().post('https://api.xdiving.io/api/fish-catch/unified-sell',
+            Manager.sellFishData,
+            (data) => {
+                console.log('卖鱼数据:', data);
+                console.log(Manager.sellFishData);
+            },
+            (error) => {
+                console.log(`卖鱼数据POST失败: ${error}`);
+            }
+            )
+        }
     }
 
     back(){
-        this.buttonAudio.play();
+        Sound.instance.buttonAudio.play();
         director.loadScene("Menu");
     }
 
