@@ -1,4 +1,4 @@
-import { _decorator, animation, Component, instantiate, JsonAsset, Label, Node, Prefab, ProgressBar, randomRange, Skeleton, Sprite, SpriteFrame, UITransform, Vec3 } from 'cc';
+import { _decorator, animation, Component, instantiate, JsonAsset, Label, Mask, Node, Prefab, ProgressBar, randomRange, Skeleton, Sprite, SpriteFrame, UITransform, Vec3 } from 'cc';
 import { sp } from 'cc';
 import { Fish } from './Fish';
 import { Manager } from './Manager';
@@ -23,6 +23,9 @@ export class Game extends Component {
     @property(GeneralUI)
     generalUI:GeneralUI=null;
 
+    @property(Mask)
+    mask:Mask=null;
+
     @property([SpriteFrame])//鱼图鉴，动图与大图
     fishImages:SpriteFrame[]=[];
     @property([sp.SkeletonData])
@@ -30,8 +33,8 @@ export class Game extends Component {
     @property(Prefab)
     fishPrefab: Prefab = null;
 
-    @property(Prefab)//道具
-    gameContentPrefab:Prefab=null;
+    //@property(Prefab)//道具
+    //gameContentPrefab:Prefab=null;
     @property([SpriteFrame])
     propSprites:SpriteFrame[]=[];
     @property(Node)
@@ -88,6 +91,7 @@ export class Game extends Component {
     //@property(Node)
     //walls:
     start() {
+        this.mask.enabled=true;
         this.generalUI.updateDisplay();
         this.generalUI.updateLevel();
 

@@ -35,6 +35,7 @@ export class BoxContent extends Component {
     selecting=false;
     diamond=0;
     coin=0;
+    weight=0;
 
     select(){
         this.box.select(this);

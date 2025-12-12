@@ -3,8 +3,11 @@
   "general": {
     "designResolution": {
       "width": 750,
-      "height": 1280
-    }
+      "height": 1280,
+      "fitHeight": true,
+      "fitWidth": true
+    },
+    "downloadMaxConcurrency": 50
   },
   "layer": [
     {

@@ -7,6 +7,7 @@ const { ccclass, property } = _decorator;
 
 @ccclass('Box')
 export class Box extends Component {
+
     
     @property(GeneralUI)
     generalUI:GeneralUI=null;
@@ -29,6 +30,12 @@ export class Box extends Component {
     @property(Label)
     diamondNumLabel:Label=null;
 
+    @property(Label)
+    kgNumLabel:Label=null;
+
+    @property(Node)
+    lockNode:Node=null;
+
     @property([SpriteFrame])
     spriteFrames:SpriteFrame[]=[];
 
@@ -44,7 +51,8 @@ export class Box extends Component {
 
     totalCoins=0;
     totalDiamonds=0;
-
+    totalKG=0;
+    remainKG=0;
     start() {
         //Manager.getInstance().post(url,
         //   Manager.startData,
@@ -104,6 +112,31 @@ export class Box extends Component {
 
     initBox(){
         this.updateDataDisplay();
+        this.remainKG=Manager.aquariumBaseData.data[Manager.aquariumLevelData.data.level-1].capacity-Manager.usedCapacity;
+        
+        // 根据用户等级设置 lock 和 kgNumLabel 的显示
+        let isLevel15OrAbove = Manager.userData && Manager.userData.data && Manager.userData.data.level >= 15;
+        if(isLevel15OrAbove){
+            // 达到15级：lock 不显示，kgNumLabel 显示
+            if(this.lockNode){
+                this.lockNode.active = false;
+            }
+            if(this.kgNumLabel){
+                this.kgNumLabel.node.active = true;
+                // 初始化 kgNumLabel 为 "0/剩余水族箱容量"
+                this.kgNumLabel.string = "0/" + this.remainKG.toFixed(2) + "kg";
+            }
+        }
+        else{
+            // 未达到15级：lock 显示，kgNumLabel 不显示
+            if(this.lockNode){
+                this.lockNode.active = true;
+            }
+            if(this.kgNumLabel){
+                this.kgNumLabel.node.active = false;
+            }
+        }
+        
         for(let index=0;index<Manager.boxData.data.length;index++){
             let contentInstance = instantiate(this.boxContentPrefab);
             
@@ -127,6 +160,7 @@ export class Box extends Component {
 
             contentComponent.box=this;
             contentComponent.identifier=contentData.identifiers;
+            contentComponent.weight=contentData.weight;  // 保存鱼的重量
             contentComponent.fishNameLabel.string=contentData.fishNameEn.toString();
             contentComponent.weightNumLabel.string=contentData.weight.toFixed(2);
             contentComponent.priceNumLabel.string=contentData.price.toString();
@@ -154,6 +188,8 @@ export class Box extends Component {
             boxContent.selecting=false;
             boxContent.selectNode.active=false;
             this.updateSellNum(-boxContent.coin,-boxContent.diamond);
+            // 取消选择时减少 totalKG
+            this.updateKG(-boxContent.weight);
 
             this.selectAllNode.active=false;
         }
@@ -161,6 +197,8 @@ export class Box extends Component {
             boxContent.selecting=true;
             boxContent.selectNode.active=true;
             this.updateSellNum(boxContent.coin,boxContent.diamond);
+            // 选择时增加 totalKG
+            this.updateKG(boxContent.weight);
         }
     }
 
@@ -172,6 +210,8 @@ export class Box extends Component {
                 boxContent.selecting=false;
                 boxContent.selectNode.active=false;
                 this.updateSellNum(-boxContent.coin,-boxContent.diamond);
+                // 取消选择时减少 totalKG
+                this.updateKG(-boxContent.weight);
             }
         }
         else{
@@ -180,6 +220,8 @@ export class Box extends Component {
                 boxContent.selecting=true;
                 boxContent.selectNode.active=true;
                 this.updateSellNum(boxContent.coin,boxContent.diamond);
+                // 选择时增加 totalKG
+                this.updateKG(boxContent.weight);
             }
         }
     }
@@ -190,6 +232,73 @@ export class Box extends Component {
         
         this.totalDiamonds+=diamond;
         this.diamondNumLabel.string="+"+this.totalDiamonds.toString();
+    }
+
+    updateKG(kg:number){
+        this.totalKG+=kg;
+        // 更新 kgNumLabel 的值为 totalKG/remainKG
+        this.kgNumLabel.string=this.totalKG.toFixed(2)+"/"+this.remainKG.toFixed(2)+"kg";
+        if(this.totalKG>this.remainKG){
+            this.kgNumLabel.color=color(255,0,0);
+        }
+        else{
+            this.kgNumLabel.color=color(255,255,255);
+        }
+    }
+
+    deposit(){//把鱼箱的鱼存入水族箱
+        Sound.instance.buttonAudio.play();
+        
+        // 如果未达到15级，不执行功能
+        if(!Manager.userData || !Manager.userData.data || Manager.userData.data.level < 15){
+            return;
+        }
+        
+        let aquariumIdentifier=parseInt(Manager.aquariumFishData.data[Manager.aquariumFishData.data.length-1].identifiers);
+        let depositFishData={identifiers:[]};
+    
+        for (let i = this.boxContents.length - 1; i >= 0; i--) {
+            const boxContent = this.boxContents[i];
+            if (boxContent.selecting == true) {
+                aquariumIdentifier++;
+                let boxdentifier=boxContent.getComponent(BoxContent).identifier;
+                depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString()});
+                boxContent.node.destroy();
+                let fishData=Manager.boxData.data[i];
+                // 从 fishBaseData 数组中查找匹配的鱼数据（fishBaseData.data 是数组，不是对象，需要用 find 查找）
+                let fishBaseData = Manager.fishBaseData.data.find(fish => fish.fishNameEn === fishData.fishNameEn);
+                let difficulty=Manager.rarityBaseData.data.find(rarity => rarity.rarity === fishData.rarity).difficulty;
+                // 如果 fishBaseData 中有 feedCost 字段，使用它；否则使用 0
+                let feedCost=Math.floor(fishBaseData.feedingPrice*difficulty);
+                let claimRewardAmount=fishBaseData.reward*difficulty;
+                Manager.aquariumFishData.data.push({identifiers:aquariumIdentifier.toString(),
+                    fishNameEn:fishData.fishNameEn,
+                    weight:fishData.weight,
+                    price:fishData.price,
+                    type:fishData.type,
+                    rarity:fishData.rarity,
+                    putInAquariumTime:Date.now(),
+                    feedCount:0,
+                    claimCount:0,
+                    feedCost:feedCost,
+                    claimRewrdAmount:claimRewardAmount});
+                depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString(),feedCost:feedCost,claimRewardAmount:claimRewardAmount});
+                Manager.boxData.data.splice(i,1);
+                this.boxContents.splice(i, 1); 
+            }
+        }
+        if(depositFishData.identifiers.length>0){
+            Manager.getInstance().post('https://api.xdiving.io/api/aquarium/deposit',
+            depositFishData,
+            (data) => {
+                console.log('存鱼数据:', data);
+                console.log(depositFishData);
+            },
+            (error) => {
+                console.log(`存鱼数据POST失败: ${error}`);
+            }
+            )
+        }
     }
 
     sell(){

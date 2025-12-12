@@ -241,7 +241,6 @@ export class Equip extends Component {
         }
     }
 
-
     back(){
         Sound.instance.buttonAudio.play();
         director.loadScene("Menu");

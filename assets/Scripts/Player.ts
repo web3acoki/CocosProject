@@ -33,6 +33,7 @@ import {
   SpriteFrame,
   UI,
   Size,
+  randomRangeInt,
 } from "cc";
 const { ccclass, property } = _decorator;
 
@@ -149,8 +150,8 @@ export default class Player extends Component {
   treasureProp:Node=null;
   @property(Sprite)
   treasurePropSprite:Sprite=null;
-  @property([SpriteFrame])
-  treasurePropSprites:SpriteFrame[]=[];
+  //@property([SpriteFrame])
+  //treasurePropSprites:SpriteFrame[]=[];
   @property(Label)
   treasureCoinNumLabel:Label=null;
   @property(Label)
@@ -599,8 +600,8 @@ export default class Player extends Component {
           this.game.treasures[index].opening.active=true;
 
           let reward=Math.round(randomRange(0.8,1.2)*Manager.treasureBaseData.data[index].coins);
-          let propReward=Math.floor(randomRange(250,Manager.treasureBaseData.data[index].coins));
-          let propIndex=Math.floor(randomRange(0,Manager.propBaseData.data.length));
+          let propReward=randomRangeInt(250,Manager.treasureBaseData.data[index].coins);
+          let propIndex=randomRangeInt(0,Manager.propBaseData.data.length-1);
           let propNum=Math.floor(propReward/Manager.propBaseData.data[propIndex].costGold);
           let goldNum=reward-propNum*Manager.propBaseData.data[propIndex].costGold;
           Manager.endData.treasures.push({rewardType:"Gold",quantity:goldNum});
@@ -608,7 +609,7 @@ export default class Player extends Component {
             Manager.endData.treasures.push({rewardType:Manager.propBaseData.data[propIndex].propNameEn,quantity:propNum});
             this.treasureGold.active=false;
             this.treasureProp.active=true;
-            this.treasurePropSprite.spriteFrame=this.treasurePropSprites[propIndex];
+            this.treasurePropSprite.spriteFrame=this.game.propSprites[propIndex];
             this.treasureCoinNumLabel.string=goldNum.toString();
             this.treasurePropNumLabel.string=propNum.toString();
           }
@@ -636,7 +637,6 @@ export default class Player extends Component {
       if(Manager.questData.data[7].progress<this.depth) this.finishQuest(7);
       if(Manager.questData.data[14].progress<this.depth) this.finishQuest(14);
     }
-
     if(this.depth<1){
       if(this.firstWin){
         this.firstWin=false;
@@ -846,9 +846,13 @@ export default class Player extends Component {
         while(j<10){
           j++;
           if(Manager.userData.data.level<Manager.levelBaseData.data.length){
-            if(Manager.userData.data.experience>=Manager.levelBaseData.data[Manager.userData.data.level].experienceRequired){
+            if(Manager.userData.data.experience>=Manager.levelBaseData.data[Manager.userData.data.level].experienceRequired){//升级
               Manager.userData.data.level++;
               Manager.userData.data.experience-=Manager.levelBaseData.data[Manager.userData.data.level-1].experienceRequired;
+              Manager.levelStatusDatas[Manager.userData.data.level-1].status=2;
+              if(Manager.userData.data.vip){
+                Manager.levelStatusDatas[Manager.userData.data.level-1].extraStatus=2;
+              }
             }
             else{
               break;
@@ -898,33 +902,13 @@ export default class Player extends Component {
         if(fishData.fishNameEn=="Sardine") this.finishQuest(2);
         if(fishData.fishNameEn=="Angler") this.finishQuest(4);
         if(fishData.fishNameEn=="Swordfish") this.finishQuest(6);
-        if(fishData.fishNameEn=="WhaleShark") this.finishQuest(8);
+        if(fishData.fishNameEn=="Whaleshark") this.finishQuest(8);
         if(fishData.fishNameEn=="Flyingfish") this.finishQuest(9);
         if(fishData.fishNameEn=="Tuna") this.finishQuest(10);
         if(fishData.fishNameEn=="Octopus") this.finishQuest(11);
         if(fishData.fishNameEn=="Moonfish") this.finishQuest(12);
         this.finishQuest(13);
 
-        //for(let index=Manager.questData.data.length-1;index>=0;index--){
-        //  const quest=Manager.questData.data[index];
-        //  const identifier=quest.identifier-9006;
-        //  const questBase=Manager.questBaseData.data[identifier];
-        //  if(quest.questStatus<3){
-        //    switch(identifier){
-        //      case 0:
-        //      this.finishQuest(quest);break;
-        //      case 2:if(fishData.fishNameEn=="Sardinefish")this.finishQuest(quest);break;
-        //      case 4:if(fishData.fishNameEn=="Angler")this.finishQuest(quest);break;
-        //      case 6:if(fishData.fishNameEn=="Swordfish")this.finishQuest(quest);break;
-        //      case 8:if(fishData.fishNameEn=="WhaleShark")this.finishQuest(quest);break;
-        //      case 9:if(fishData.fishNameEn=="Flyingfish​")this.finishQuest(quest);break;
-        //      case 10:if(fishData.fishNameEn=="Tuna")this.finishQuest(quest);break;
-        //      case 11:if(fishData.fishNameEn=="Octopus​")this.finishQuest(quest);break;
-        //      case 12:if(fishData.fishNameEn=="Moonfish")this.finishQuest(quest);break;
-        //      case 13:this.finishQuest(quest);break;
-        //    }
-        //  }
-        //}
       }
       else{//超重
         this.catchingFish.getComponent(Fish).beingCatched=false;
@@ -1029,7 +1013,7 @@ export default class Player extends Component {
     this.overFrame.active=false;
   }
   
-  back(){
+  back(){//返回
     this.consuming=false;
     this.playerState=PlayerState.WIN;
     Manager.endData.endReason="NORMALEND";
@@ -1060,7 +1044,7 @@ export default class Player extends Component {
     Sound.instance.BGM.play();
   }
 
-  win(deltaTime){
+  win(deltaTime){//胜利动画
     this.backTimer+=deltaTime;
     if(this.blackGround.node.active==false){
       Sound.instance.backAudio.play();
@@ -1076,7 +1060,7 @@ export default class Player extends Component {
     }
   }
 
-  oxygenNotIncluded(){
+  oxygenNotIncluded(){//氧气耗尽
     this.playerState=PlayerState.DIE;
     this.firstDie=false;
     this.consuming=false;
@@ -1107,7 +1091,7 @@ export default class Player extends Component {
     this.dyingBody.active=true;
   }
 
-  die(deltaTime){
+  die(deltaTime){//死亡动画
     if(this.confirm){
       this.dieTimer+=deltaTime;
       if(this.dieTimer>1.6){

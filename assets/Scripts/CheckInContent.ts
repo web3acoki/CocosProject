@@ -72,6 +72,7 @@ export class CheckInContent extends Component {
         }
         checkData.isCheckedToday=true;
         this.menu.updateDataDisplay();
+        this.menu.updateCheckInHint();
     }
 
     updateCheckIn(){

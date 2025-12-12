@@ -1,4 +1,4 @@
-import { _decorator, Component, director, SpriteFrame } from 'cc';
+import { _decorator, Component, director, SpriteFrame, view, screen, Size, ResolutionPolicy } from 'cc';
 //import { Equip } from './Equip';
 //import { init, initData, retrieveLaunchParams  } from '@telegram-apps/sdk';
 
@@ -33,6 +33,13 @@ interface FishBaseData {
     baseCoins:number;
     baseDiamonds:number;
     spawnRegion:number;
+
+    life:number;
+    feedingFrequency:number;
+    feedingPrice:number;
+    reward:number;
+
+
 }
 
 interface EquipmentDataResponse{//装备基础数据
@@ -101,7 +108,7 @@ interface questBaseData{
     rewardQuantity:number;
 }
 
-interface levelDataResponse{
+interface levelDataResponse{//等级基础数据
     data:levelBaseData[];
 }
 interface levelBaseData{
@@ -111,6 +118,27 @@ interface levelBaseData{
     rewardQuantity:number;
     extraType:string;
     extraQuantity:number;
+}
+
+interface aquariumDataResponse{//水族箱基础数据
+    data:aquariumBaseData[];
+}
+interface aquariumBaseData{
+    level:number;
+    gold:number;
+    diamond:number;
+    capacity:number;
+    fee:number;
+}
+
+interface decorationDataResponse{//装饰基础数据
+    data:decorationBaseData[];
+}
+interface decorationBaseData{
+    decorationId:number;
+    decorationName:string;
+    price:number;
+    bonus:number;
 }
 
 interface setRequest{//设置
@@ -201,6 +229,15 @@ interface QuestData{
     questStatus:number;
 }
 
+interface levelResponse{//用户等级数据
+    data:levelData[];
+}
+interface levelData{
+    level:number;
+    rewardClaimed:boolean;
+    extraRewardClaimed:boolean;
+}
+
 interface EquipmentResponse{//用户装备数据
     data:Equipment[];
 }
@@ -245,6 +282,38 @@ interface Reward{
     propQuantity:number;
 }
 
+interface aquariumFishResponse{//用户水族箱鱼数据
+    data:aquariumFishData[];
+}
+interface aquariumFishData{
+
+    identifiers:string;
+    fishNameEn:string;
+    weight:number;
+    price:number;
+    type:string;
+    rarity:string;
+    putInAquariumTime:number;//放入时间
+    feedCount:number;//投喂次数
+    claimCount:number;
+    feedCost:number;
+    claimRewrdAmount:number;
+
+}
+interface decorationResponse{//用户水族箱装饰数据
+    data:decorationData[];
+}
+interface decorationData{
+    decorationId:number;
+    status:number;
+}
+interface aquariumLevelResponse{//用户水族箱等级数据
+    data:aquariumLevelData;
+}
+interface aquariumLevelData{
+    level:number;
+}//用户水族箱升级数据
+
 interface UserResponse{//用户其他数据
     data:User;
 }
@@ -255,6 +324,7 @@ interface User{
     diamonds:number;
     level:number;
     experience:number;
+    vip:boolean;
 
     BGMopen:boolean;
     BGSopen:boolean;
@@ -264,6 +334,39 @@ interface User{
     swordfishCatched:boolean;
     guideFinish:boolean;
     avatarPath:string;
+
+    timeStamp:number;//登录时间戳
+}
+
+interface topupRespond{
+    status:boolean;
+}
+
+interface InitRequest{//初始化信息
+    initData:string;
+}
+interface InitRespond{
+    data:InitData;
+    timestamp:number;
+}
+interface InitData{
+    initUser:InitUser;
+}
+interface InitUser{
+    userId:number;
+}
+interface InviteUserRespose{//用户邀请人信息
+    data:InviteUserData[];
+}
+interface InviteUserData{
+    inviteeUserId:number;
+    firstPlayed:boolean;
+}
+interface InviteCodeRespose{//用户邀请码信息
+    data:InviteCodeData;
+}
+interface InviteCodeData{
+    invitationCode:string;
 }
 
 interface Harpoon{//前端数据
@@ -279,34 +382,15 @@ interface Box{
     cost:number;
 }
 
+interface levelStatusData{
+    level:number;
+    status:number;//1:Lock,2:Unclaimed,3:Claimed
+    extraStatus:number;//1:Lock,2:Unclaimed,3:Claimed
+}
+
 //interface InitRequest{
 //    initData:string;
 //}
-interface InitRequest{
-    initData:string;
-}
-interface InitRespond{
-    data:InitData;
-}
-interface InitData{
-    initUser:InitUser;
-}
-interface InitUser{
-    userId:number;
-}
-interface InviteUserRespond{//用户邀请人信息
-    data:InviteUserData[];
-}
-interface InviteUserData{
-    inviteeUserId:number;
-    firstPlayed:boolean;
-}
-interface InviteCodeRespond{//用户邀请码信息
-    data:InviteCodeData;
-}
-interface InviteCodeData{
-    invitationCode:string;
-}
 
 @ccclass('Manager')
 export class Manager extends Component {
@@ -325,7 +409,22 @@ export class Manager extends Component {
     public static rarityBaseData:rarityDataResponse;
     public static questBaseData:questDataResponse;
     public static levelBaseData:levelDataResponse;
+    public static aquariumBaseData:aquariumDataResponse;
+    public static decorationBaseData:decorationDataResponse;
     //public static startData:StartRequest={remainingRounds:4};
+    
+    public static boxData:BoxResponse;
+    public static equipmentData:EquipmentResponse;
+    public static propData:PropResponse;
+    public static checkInData:CheckInResponse;
+    public static userData:UserResponse;
+    public static questData:QuestResponse;
+    public static inviteUserData:InviteUserRespose;
+    public static inviteCodeData:InviteCodeRespose;
+    public static levelData:levelResponse;
+    public static aquariumFishData:aquariumFishResponse;
+    public static decorationData:decorationResponse;
+    public static aquariumLevelData:aquariumLevelResponse;
 
     public static setData:setRequest={BGMopen:true,BGSopen:false};
     public static checkIn:CheckInRequest={};
@@ -343,20 +442,25 @@ export class Manager extends Component {
     //public static curCatchData:CatchData={fishNameEn:"",weight:0,price:0,type:""};
     //public static curPropData:PropData={propID:1,quantity:0};
     //public static curTreasureData:TreasureData={treasureID:1,reward:0,propID:0,propQuantity:0};
-    public static boxData:BoxResponse;
-    public static equipmentData:EquipmentResponse;
-    public static propData:PropResponse;
-    public static checkInData:CheckInResponse;
-    public static userData:UserResponse;
-    public static questData:QuestResponse;
-    public static inviteUserData:InviteUserRespond;
-    public static inviteCodeData:InviteCodeRespond;
 
     public static harpoons:Harpoon[]=[];
     public static tanks:Tank[]=[];
     public static boxs:Box[]=[];
     public static totalRarity:number=0;
     public static actualRarity:number[]=[];
+    public static levelStatusDatas:levelStatusData[]=[];
+    public static usedCapacity:number=0;
+
+    // 订单查询管理（支持多个订单同时查询，504时切换到poll接口）
+    private static activeOrderQueries: Map<number, {
+        identifier: number;
+        packageId: number;
+        onSuccess?: (data: any) => void;
+        onError?: (error: string) => void;
+        isActive: boolean; // 是否还在查询中
+        usePoll: boolean; // 是否已切换到poll接口
+    }> = new Map();
+
     public static loaded=false;
 
     public static initRequest:InitRequest;
@@ -416,7 +520,12 @@ export class Manager extends Component {
             director.addPersistRootNode(this.node);
         }
         
-        // 初始化钱包（只初始化一次，避免重复加载）
+        // 调整窗口适配策略：当宽度 > 高度 * 0.652 时，关闭适配屏幕高度，反之打开
+        this.adjustAspect();
+        this.schedule(() => {
+            this.adjustAspect();
+        }, 0.1);
+        
         this.initWallet().catch(err => console.error('钱包初始化失败:', err));
         this.loadBaseData();
         this.initTGUser();
@@ -445,6 +554,43 @@ export class Manager extends Component {
 
     }
 
+    // 缓存上一次的窗口大小，避免频繁判断
+    private lastWindowSize: Size = null;
+
+    /**
+     * 调整窗口适配策略：
+     * - 当宽度 > 高度 * 0.652 时，关闭适配屏幕高度（使用 SHOW_ALL）
+     * - 当宽度 <= 高度 * 0.652 时，打开适配屏幕高度（使用 FIXED_WIDTH）
+     * - 只在 windowSize 有变化时才判断，避免频繁判断
+     */
+    adjustAspect(){
+        let windowSize = screen.windowSize;
+        
+        // 检查窗口大小是否有变化
+        if(this.lastWindowSize && 
+           this.lastWindowSize.width === windowSize.width && 
+           this.lastWindowSize.height === windowSize.height){
+            // 窗口大小没有变化，跳过判断
+            return;
+        }
+        
+        // 窗口大小有变化，更新缓存
+        this.lastWindowSize = new Size(windowSize.width, windowSize.height);
+        
+        // 执行适配策略判断
+        let designSize = view.getDesignResolutionSize();
+        let aspectRatio = windowSize.width / windowSize.height;
+        
+        if(aspectRatio > 0.652){
+            // 宽度 > 高度 * 0.652，关闭适配屏幕高度（固定宽度）
+            view.setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy.SHOW_ALL);
+        }
+        else{
+            // 宽度 <= 高度 * 0.652，打开适配屏幕高度（固定高度）
+            view.setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy.FIXED_WIDTH);
+        }
+    }
+
     postTest(testText:string){
         let testData={
             message:testText
@@ -463,7 +609,7 @@ export class Manager extends Component {
     getTest(getNumber:number){
         this.get('https://api.xdiving.io/api/test/simple/array/'+getNumber.toString(),
         (data) => {
-          console.log(data);
+          console.log(`测试数据: ${data}`);
         },
         (error) => {
             console.log(`测试数据GET失败: ${error}`);
@@ -499,8 +645,10 @@ export class Manager extends Component {
         this.getData('https://api.xdiving.io/api/rarity/all', (data) => Manager.rarityBaseData = data, '稀有度基础', () => this.initRarity());
         this.getData('https://api.xdiving.io/api/quest/all', (data) => Manager.questBaseData = data, '任务基础', () => {});
         this.getData('https://api.xdiving.io/api/level/all', (data) => Manager.levelBaseData = data, '等级基础', () => {});
+        this.getData('https://api.xdiving.io/api/aquarium/list', (data) => Manager.aquariumBaseData = data, '水族箱基础', () => {});
+        this.getData('https://api.xdiving.io/api/decoration/list', (data) => Manager.decorationBaseData = data, '装饰基础', () => {});
     }
-
+    
     initTGUser(){
         
         //TelegramWebApp.Instance.init().then(res => {
@@ -523,8 +671,11 @@ export class Manager extends Component {
         ////this.getTest(2);
         //this.postTest("initData: "+WebApp['default'].initData);
         //this.getTest(3);
-        Manager.initRequest={initData:WebApp['default'].initData};
-        this.initUser();
+        let initData=WebApp['default'].initData;
+        if(initData){
+            Manager.initRequest={initData:initData};
+            this.initUser();
+        }
         //Manager.testAuthdate=WebApp['default'].initDataUnsafe.auth_date.toString();
         //Manager.testUserId=WebApp['default'].initDataUnsafe.user.id.toString();
 
@@ -565,11 +716,16 @@ export class Manager extends Component {
 
     addFinish(){
         Manager.loadFinish++;
+        if(Manager.loadFinish>=12){
+            this.initLevel();
+            this.initAquarium();
+            Manager.loadFinish++;
+        }
     }
 
     getFinish(){
         // 检查用户数据是否加载完成
-        const userDataLoaded = Manager.loadFinish == 8;
+        const userDataLoaded = Manager.loadFinish >=13;
         
         // ========== 旧钱包功能已停用 ==========
         // 不再检查 TON Connect 初始化状态，因为已改用新的 Wallet.ts
@@ -599,6 +755,10 @@ export class Manager extends Component {
         this.getData("https://api.xdiving.io/api/invitation/user/"+userId.toString()+"/code", (data) => Manager.inviteCodeData = data, '邀请码', () => this.addFinish());
         this.getData("https://api.xdiving.io/api/invitation/user/"+userId.toString()+"/invitees", (data) => Manager.inviteUserData = data, '邀请人', () => this.addFinish());
         this.getData("https://api.xdiving.io/api/quest/user/list", (data) => Manager.questData = data, '任务', () => this.addFinish());
+        this.getData("https://api.xdiving.io/api/level/claimed-rewards", (data) => Manager.levelData = data, '等级', () => this.addFinish());
+        this.getData("https://api.xdiving.io/api/aquarium/user/fish",(data) => Manager.aquariumFishData = data, '水族箱鱼', () => this.addFinish());
+        this.getData("https://api.xdiving.io/api/aquarium/decoration/user",(data) => Manager.decorationData = data, '水族箱装饰', () => this.addFinish());
+        this.getData("https://api.xdiving.io/api/aquarium/user/upgrade",(data) => Manager.aquariumLevelData = data, '水族箱等级', () => this.addFinish());
     }
 
     //loadBox(){
@@ -628,6 +788,39 @@ export class Manager extends Component {
             Manager.totalRarity=totalRarity;
             Manager.actualRarity.push(totalRarity);
         }
+    }
+
+    initLevel(){
+        for(let index=0;index<Manager.levelBaseData.data.length;index++){
+            if(index<Manager.userData.data.level){
+                if(Manager.userData.data.vip){
+                    Manager.levelStatusDatas.push({level:index+1,status:2,extraStatus:2});
+                }
+                else{
+                    Manager.levelStatusDatas.push({level:index+1,status:2,extraStatus:1});
+                }
+            }
+            else{
+                Manager.levelStatusDatas.push({level:index+1,status:1,extraStatus:1});
+            }
+        }
+        
+        for(const level of Manager.levelData.data){
+            if(level.rewardClaimed){
+                Manager.levelStatusDatas[level.level-1].status=3;
+            }
+            if(level.extraRewardClaimed){
+                Manager.levelStatusDatas[level.level-1].extraStatus=3;
+            }
+        }
+    }
+
+    initAquarium(){
+
+
+        //for(let index=0;index<Manager.aquariumFishData.data.length;index++){
+        //    Manager.usedCapacity+=Manager.aquariumFishData.data[index].fishData.weight;
+        //}
     }
 
     //loadEquip(){
@@ -700,10 +893,6 @@ export class Manager extends Component {
             options.onError('网络错误');
         };
         
-        request.ontimeout = () => {
-            options.onError('请求超时');
-        };
-        
         if (options.data) {
             request.send(JSON.stringify(options.data));
         } else {
@@ -718,6 +907,183 @@ export class Manager extends Component {
             onSuccess: onSuccess,
             onError: onError || ((error) => console.error('GET请求失败:', error))
         });
+    }
+
+    /**
+     * 开始订单查询（504时立即切换到poll接口持续查询）
+     * @param identifier 订单号
+     * @param packageId 套餐ID
+     * @param onSuccess 成功回调（可选，用于更新UI）
+     * @param onError 失败回调（可选）
+     */
+    startOrderQuery(
+        identifier: number,
+        packageId: number,
+        onSuccess?: (data: any) => void,
+        onError?: (error: string) => void
+    ) {
+        // 如果该订单已经在查询中，不重复查询
+        if (Manager.activeOrderQueries.has(identifier)) {
+            console.log(`订单 ${identifier} 已在查询中，跳过重复查询`);
+            return;
+        }
+
+        // 添加到查询列表
+        Manager.activeOrderQueries.set(identifier, {
+            identifier: identifier,
+            packageId: packageId,
+            onSuccess: onSuccess,
+            onError: onError,
+            isActive: true,
+            usePoll: false // 初始使用query接口
+        });
+
+        const queryOrder = () => {
+            // 检查订单是否还在查询中（可能被停止）
+            const queryInfo = Manager.activeOrderQueries.get(identifier);
+            if (!queryInfo || !queryInfo.isActive) {
+                console.log(`订单 ${identifier} 已停止查询`);
+                return;
+            }
+
+            // 根据是否切换到poll接口选择URL
+            const url = queryInfo.usePoll 
+                ? `https://api.xdiving.io/api/shop/order/poll?identifier=${identifier}`
+                : `https://api.xdiving.io/api/shop/order/query?identifier=${identifier}&itemId=${packageId}`;
+
+            const request = new XMLHttpRequest();
+            request.open('GET', url);
+            
+            // 添加 Authorization header
+            if (Manager.accessToken) {
+                request.setRequestHeader('Authorization', `Bearer ${Manager.accessToken}`);
+            }
+            
+            request.responseType = 'text';
+            
+            request.onload = () => {
+                // 再次检查订单是否还在查询中
+                const currentQueryInfo = Manager.activeOrderQueries.get(identifier);
+                if (!currentQueryInfo || !currentQueryInfo.isActive) {
+                    return;
+                }
+
+                if (request.status >= 200 && request.status < 300) {
+                    try {
+                        const data = JSON.parse(request.responseText);
+                        console.log(`订单 ${identifier} 查询成功:`, data);
+                        
+                        // 无论订单状态如何，只要有返回就停止查询
+                        // 如果订单完成，更新Manager数据
+                        if (data.data && data.data.status == "COMPLETED") {
+                            this.handleOrderCompleted(data, packageId);
+                        }
+                        
+                        // 停止查询，从列表中移除
+                        currentQueryInfo.isActive = false;
+                        Manager.activeOrderQueries.delete(identifier);
+                        
+                        // 调用成功回调（如果界面还在）
+                        if (currentQueryInfo.onSuccess) {
+                            currentQueryInfo.onSuccess(data);
+                        }
+                    } catch (error) {
+                        console.log(`订单 ${identifier} JSON解析错误:`, error);
+                        // JSON解析错误，停止查询
+                        currentQueryInfo.isActive = false;
+                        Manager.activeOrderQueries.delete(identifier);
+                        if (currentQueryInfo.onError) {
+                            currentQueryInfo.onError('JSON解析错误: ' + error);
+                        }
+                    }
+                } else if (request.status == 504) {
+                    // 504 Gateway Timeout，立即切换到poll接口继续查询（不等待）
+                    console.log(`订单 ${identifier} 查询504超时，立即切换到poll接口继续查询...`);
+                    if (!currentQueryInfo.usePoll) {
+                        // 切换到poll接口
+                        currentQueryInfo.usePoll = true;
+                    }
+                    // 立即继续查询（不等待）
+                    queryOrder();
+                } else {
+                    // 其他HTTP错误，停止查询
+                    console.log(`订单 ${identifier} 查询HTTP错误:`, request.status);
+                    currentQueryInfo.isActive = false;
+                    Manager.activeOrderQueries.delete(identifier);
+                    if (currentQueryInfo.onError) {
+                        currentQueryInfo.onError(`HTTP错误: ${request.status}`);
+                    }
+                }
+            };
+            
+            request.onerror = () => {
+                // 再次检查订单是否还在查询中
+                const currentQueryInfo = Manager.activeOrderQueries.get(identifier);
+                if (!currentQueryInfo || !currentQueryInfo.isActive) {
+                    return;
+                }
+
+                console.log(`订单 ${identifier} 查询网络错误，继续查询...`);
+                // 网络错误也继续查询（如果已切换到poll接口，继续使用poll；否则继续使用query）
+                queryOrder();
+            };
+            
+            request.send();
+        };
+        
+        // 开始查询
+        queryOrder();
+    }
+
+    /**
+     * 停止订单查询
+     * @param identifier 订单号
+     */
+    stopOrderQuery(identifier: number) {
+        const queryInfo = Manager.activeOrderQueries.get(identifier);
+        if (queryInfo) {
+            queryInfo.isActive = false;
+            Manager.activeOrderQueries.delete(identifier);
+            console.log(`订单 ${identifier} 查询已停止`);
+        }
+    }
+
+    /**
+     * 处理订单完成，更新Manager中的数据
+     */
+    private handleOrderCompleted(orderData: any, packageId: number) {
+        // 根据套餐ID获取套餐数据
+        let topupData = null;
+        
+        // 查找套餐数据（可能是商城套餐或VIP套餐）
+        if (packageId == 10000) {
+            // VIP套餐
+            Manager.userData.data.vip = true;
+            // 更新等级奖励状态
+            for (let index = 0; index < Manager.levelBaseData.data.length; index++) {
+                if (index < Manager.userData.data.level) {
+                    Manager.levelStatusDatas[index].extraStatus = 2;
+                }
+            }
+        } else if (Manager.topupBaseData && Manager.topupBaseData.data) {
+            // 商城套餐
+            const packageIndex = packageId - 1;
+            if (packageIndex >= 0 && packageIndex < Manager.topupBaseData.data.length) {
+                topupData = Manager.topupBaseData.data[packageIndex];
+                
+                if (topupData.type == "Gold") {
+                    Manager.userData.data.coins += topupData.quantity;
+                }
+                else if (topupData.type == "Super booster") {
+                    Manager.propData.data[3].quantity += topupData.quantity;
+                }
+                else if (topupData.type == "Return capsule") {
+                    Manager.propData.data[4].quantity += topupData.quantity;
+                }
+            }
+        }
+        
+        console.log(`订单完成，已更新Manager数据，套餐ID: ${packageId}`);
     }
     
     post(url: string, data: any, onSuccess: (data: any) => void, onError?: (error: string) => void) {

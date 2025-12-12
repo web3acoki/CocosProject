@@ -1,9 +1,10 @@
-import { _decorator, assetManager, AudioSource, color, Color, Component,director, EditBox, ImageAsset, Label, loader, Node, SpringJoint2D, Sprite, SpriteFrame, Texture2D, Vec3 } from 'cc';
+import { _decorator, assetManager, AudioSource, color, Color, Component,director, EditBox, ImageAsset, instantiate, Label, loader, Node, Prefab, SpringJoint2D, Sprite, SpriteFrame, Texture2D, Vec3 } from 'cc';
 import { Manager } from './Manager';
 import { CheckInContent } from './CheckInContent';
 import { Sound } from './Sound';
 import { GeneralUI } from './GeneralUI';
 import { PropContent } from './PropContent';
+import { LevelContent } from './LevelContent';
 
 const { ccclass, property } = _decorator;
 
@@ -28,6 +29,8 @@ export class Menu extends Component {
     @property(Node)
     riseShip: Node = null;
 
+    @property(Node)
+    lockNode:Node=null;
     //@property(Node)
     //settingFrame: Node = null;
     @property(Node)
@@ -36,6 +39,8 @@ export class Menu extends Component {
     blackFrame: Node = null;
     @property(Node)
     comingSoonFrame: Node = null;
+    @property(Node)
+    lockFrame:Node=null;
     
     @property(Node)
     checkInFrame: Node = null;
@@ -50,13 +55,7 @@ export class Menu extends Component {
     chooseMapNode: Node = null;
     @property(Node)
     chooseMapNode2: Node = null;
-    
-    //@property(Label)
-    //userId: Label = null;
-    //@property(Label)
-    //userCoins: Label = null;
-    //@property(Label)
-    //userDiamonds: Label = null;
+
     @property(Label)
     availableDives: Label = null;
     
@@ -64,10 +63,6 @@ export class Menu extends Component {
     propFrame:Node=null;
     @property(Node)
     propContentNode:Node=null;
-    //@property(Label)
-    //propCost:Label=null;
-    //@property(Label)
-    //propNum:Label=null;
 
     @property(Label)
     test1:Label=null;
@@ -89,6 +84,17 @@ export class Menu extends Component {
     guideGround:Node=null;
     @property(Node)
     finger:Node=null;
+
+    @property(Node)
+    checkInHint:Node=null;
+    @property(Node)
+    questHint:Node=null;
+    @property(Node)
+    levelHint:Node=null;
+    @property(Node)
+    aquariumHint:Node=null;
+    @property(Node)
+    boxHint:Node=null;
 
     //@property(Node)
     //BGMon:Node=null;
@@ -125,6 +131,7 @@ export class Menu extends Component {
         Sound.instance.moveAudio.stop();
         Sound.instance.stayAudio.stop();
         Sound.instance.boostAudio.stop();
+
         this.manOrigin=this.standMan.position.clone();
         this.walkOrigin=this.walkMan.position.clone();
         this.shipOrigin=this.dropShip.position.clone();
@@ -135,9 +142,14 @@ export class Menu extends Component {
         director.preloadScene("Referral");
         director.preloadScene("Load");
         director.preloadScene("Game");
+        director.preloadScene("Aquarium");
         
+        if(Manager.userData.data.level<15){
+            this.lockNode.active=true;
+        }
         this.initProp();
         this.updateDataDisplay();
+        this.updateHint();
 
         //assetManager.loadRemote("https://amzn-s3-diving-bucket.s3.ap-northeast-1.amazonaws.com/test.png", (err, asset) => {
         //    const texture = new Texture2D();
@@ -191,6 +203,63 @@ export class Menu extends Component {
         }
         
         //this.updateSetting();
+    }
+
+    updateHint(){
+        // 检查是否有未领取的任务奖励（questStatus == 3 表示可以领取）
+        let hasUnclaimedReward = false;
+        if(Manager.questData && Manager.questData.data){
+            for(let i = 0; i < Manager.questData.data.length; i++){
+                if(Manager.questData.data[i].questStatus == 3){
+                    hasUnclaimedReward = true;
+                    break;
+                }
+            }
+        }
+        // 如果有未领取的任务奖励，显示 questHint（但需要检查 guideFinish）
+        this.questHint.active = hasUnclaimedReward && Manager.userData.data.guideFinish;
+        
+        // 检查鱼箱是否有鱼
+        let hasFishInBox = false;
+        if(Manager.boxData && Manager.boxData.data && Manager.boxData.data.length > 0){
+            hasFishInBox = true;
+        }
+        this.boxHint.active = hasFishInBox;
+        
+        // 检查是否有未领取的等级奖励（status == 2 表示未领取）
+        this.updateLevelHint();
+        
+        // 检查今天是否签到（isCheckedToday == false 表示今天没签到）
+        this.updateCheckInHint();
+    }
+
+    updateCheckInHint(){
+        // guideFinish 为 false 时，不显示 checkInHint
+        if(!Manager.userData.data.guideFinish){
+            this.checkInHint.active = false;
+            return;
+        }
+        
+        // 检查今天是否签到（isCheckedToday == false 表示今天没签到）
+        let notCheckedInToday = false;
+        if(Manager.checkInData && Manager.checkInData.data){
+            notCheckedInToday = !Manager.checkInData.data.isCheckedToday;
+        }
+        this.checkInHint.active = notCheckedInToday;
+    }
+
+    updateLevelHint(){
+        // 检查是否有未领取的等级奖励（status == 2 表示未领取）
+        let hasUnclaimedLevelReward = false;
+        if(Manager.levelStatusDatas && Manager.levelStatusDatas.length > 0){
+            for(let i = 0; i < Manager.levelStatusDatas.length; i++){
+                if(Manager.levelStatusDatas[i].status == 2 || Manager.levelStatusDatas[i].extraStatus == 2){
+                    hasUnclaimedLevelReward = true;
+                    break;
+                }
+            }
+        }
+        this.levelHint.active = hasUnclaimedLevelReward;
     }
 
     //updateSetting(){
@@ -505,6 +574,23 @@ export class Menu extends Component {
         director.loadScene("Quest");
     }
 
+    aquarium(){
+        Sound.instance.buttonAudio.play();
+        if(Manager.userData.data.level>=15){
+            director.loadScene("Aquarium");
+        }
+        else{
+            // 先取消之前的定时器，防止连续点击时时间不重置
+            this.lockFrame.active=true;
+            this.unschedule(this.hideLockFrame);
+            this.scheduleOnce(this.hideLockFrame, 1);
+        }
+    }
+
+    hideLockFrame(){
+        this.lockFrame.active=false;
+    }
+
     propHide(){
         Sound.instance.buttonAudio.play();
         this.propFrame.active=!this.propFrame.active;
@@ -528,6 +614,5 @@ export class Menu extends Component {
         Sound.instance.buttonAudio.play();
         this.checkInFrame.active=!this.checkInFrame.active;
     }
-
 }
 

@@ -1,4 +1,4 @@
-import { _decorator, Component, EditBox, Label, Node, ProgressBar, sys } from 'cc';
+import { _decorator, Component, EditBox, Label, Node, ProgressBar, color, sys } from 'cc';
 import { Manager } from './Manager';
 import { Sound } from './Sound';
 const { ccclass, property } = _decorator;
@@ -209,6 +209,7 @@ export class GeneralUI extends Component {
             }
             if (this.connectLabel) {
                 this.connectLabel.string = "Disconnect";
+                this.connectLabel.color = color(255, 0, 0, 255);
             }
         } else {
             // 未连接时：statusLabel 显示等待连接钱包，connectLabel 显示 connect wallet
@@ -216,7 +217,8 @@ export class GeneralUI extends Component {
                 this.statusLabel.string = "Waiting to connect wallet";
             }
             if (this.connectLabel) {
-                this.connectLabel.string = "Connect Wallet";
+                this.connectLabel.string = "Connect wallet";
+                this.connectLabel.color = color(255, 255, 255, 255);
             }
         }
     }
@@ -246,33 +248,7 @@ export class GeneralUI extends Component {
     }
 
     updateSound(){
-        if(Manager.userData.data.BGMopen){
-            Sound.instance.BGM.volume=1;
-            Sound.instance.stayAudio.volume=1;
-            Sound.instance.moveAudio.volume=1;
-            Sound.instance.boostAudio.volume=1;
-            
-        }
-        else{
-            Sound.instance.BGM.volume=0;
-            Sound.instance.stayAudio.volume=0;
-            Sound.instance.moveAudio.volume=0;
-            Sound.instance.boostAudio.volume=0;
-        }
-        if(Manager.userData.data.BGSopen){
-            Sound.instance.buttonAudio.volume=1;
-            Sound.instance.shootAudio.volume=0.5;
-            Sound.instance.catchAudio.volume=1;
-            Sound.instance.treasureAudio.volume=1;
-            Sound.instance.backAudio.volume=1;
-        }
-        else{
-            Sound.instance.buttonAudio.volume=0;
-            Sound.instance.catchAudio.volume=0;
-            Sound.instance.treasureAudio.volume=0;
-            Sound.instance.shootAudio.volume=0;
-            Sound.instance.backAudio.volume=0;
-        }
+        Sound.instance.updateSound();
     }
 
     SettingBGM(){

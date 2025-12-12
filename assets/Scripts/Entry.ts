@@ -1,5 +1,7 @@
-import { _decorator, Component, director, EditBox, Node, ProgressBar } from 'cc';
+import { _decorator, Component, director, EditBox, Label, Node, ProgressBar, ResolutionPolicy, sys, view } from 'cc';
 import { Manager } from './Manager';
+import WebApp from '@twa-dev/sdk';
+import { Sound } from './Sound';
 const { ccclass, property } = _decorator;
 
 @ccclass('Entry')
@@ -8,20 +10,36 @@ export class Entry extends Component {
     @property(ProgressBar)
     pBar:ProgressBar=null;
 
+    @property(Node)
+    webNode:Node=null;
+
     @property(EditBox)
     userIdInput:EditBox=null;
+
+    @property(Label)
+    loginWarn:Label=null;
+
+    @property(Label)
+    serverWarn:Label=null;
     
     progressTimer=0;
 
     firstload=false;
     resourceProgress=0;
-    tonConnectTimeout=10; // TON Connect 初始化超时时间（秒）
-    tonConnectStartTime=0; // TON Connect 初始化开始时间
     
     start() {
-        // 记录 TON Connect 初始化开始时间
-        //this.tonConnectStartTime = Date.now();
-        
+
+        this.initDisplay();
+        服务器在维护则弹出警告:
+        Manager.getInstance().get('https://api.xdiving.io/api/treasure/list',
+        (data) => {
+          console.log(`测试数据: ${data}`);
+        },
+        (error) => {
+            console.log(`测试数据GET失败: ${error}`);
+            this.serverWarnDisplay();
+        });
+
         director.preloadScene('Menu', 
             (completedCount: number, totalCount: number) => {
                 // 这是真实的资源加载进度
@@ -36,48 +54,61 @@ export class Entry extends Component {
         );
     }
 
+    initDisplay(){
+        在TG环境直接显示进度条在web环境显示登录界面:
+        if(WebApp['default']?.initData){
+            this.pBar.node.active=true;
+        }
+        else{
+            this.webNode.active=true;
+        }
+    }
+
+    serverWarnDisplay(){
+        this.pBar.node.active=false;
+        this.webNode.active=false;
+        this.serverWarn.node.active=true;
+    }
+
+    enterGame(){
+        Sound.instance.buttonAudio.play();
+        let userId=parseInt(this.userIdInput.string);
+        没有用户id则提示连接钱包:
+        if(userId){
+            this.userIdInput.node.active=false;
+            this.pBar.node.active=true;
+            this.firstload=false;
+            Manager.loadFinish=0;
+            Manager.getInstance().initFakeUser(userId);
+            this.webNode.active=false;
+        }
+        else{
+            this.loginWarn.node.active=true;
+            this.scheduleOnce(() => {
+                this.loginWarn.node.active=false;
+            }, 5);
+        }
+    }
+
+    launchOnTelegram(){
+        Sound.instance.buttonAudio.play();
+        sys.openURL('https://t.me/xdiving_bot');
+    }
+
+    connectWallet(){
+        Sound.instance.buttonAudio.play();
+        sys.openURL('https://xdiving.io/');
+    }
+
     update(deltaTime: number) {
-        //this.progressTimer+=deltaTime;
-        //if(this.progressTimer>10){
-        //    this.pBar.progress=0.98;
-        //}
-        //else if(this.progressTimer>7.5){
-        //    this.pBar.progress=0.95;
-        //}
-        //else if(this.progressTimer>6){
-        //    this.pBar.progress=0.9;
-        //}
-        //else if(this.progressTimer>4.5){
-        //    this.pBar.progress=0.85;
-        //}
-        //else if(this.progressTimer>3.5){
-        //    this.pBar.progress=0.75;
-        //}
-        //else if(this.progressTimer>2.5){
-        //    this.pBar.progress=0.55;
-        //}
-        //else if(this.progressTimer>1.75){
-        //    this.pBar.progress=0.5;
-        //}
-        //else if(this.progressTimer>1){
-        //    this.pBar.progress=0.35;
-        //}
-        //else if(this.progressTimer>0.5){
-        //    this.pBar.progress=0.2;
-        //}
-        //else{
-        //    this.pBar.progress=0.1;
-        //}
         
         this.pBar.progress = this.resourceProgress;
+        资源加载完成则加载菜单场景:
         if(this.firstload==false){
-            // 检查是否超时（TON Connect 初始化超过指定时间）
-            //const elapsedTime = (Date.now() - this.tonConnectStartTime) / 1000; // 转换为秒
-            //const isTimeout = elapsedTime >= this.tonConnectTimeout;
-            
             if(Manager.getInstance().getFinish())
             {
                 this.firstload=true;
+                Sound.instance.updateSound();
                 director.loadScene('Menu');
             }
         }
@@ -87,18 +118,4 @@ export class Entry extends Component {
         this.userIdInput.node.active=!this.userIdInput.node.active;
     }
 
-    initUser(){
-        let userId=parseInt(this.userIdInput.string);
-        this.userIdInput.node.active=false;
-        this.firstload=false;
-        Manager.loadFinish=0;
-        if(userId==0){
-            Manager.getInstance().initTGUser();
-        }
-        else{
-            Manager.getInstance().initFakeUser(userId);
-        }
-    }
 }
-
-

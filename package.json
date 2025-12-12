@@ -9,12 +9,7 @@
     "@telegram-apps/sdk": "^3.11.8",
     "@ton/cocos-sdk": "^0.0.1-beta.1",
     "@tonconnect/ui": "^2.0.1",
-    "@twa-dev/sdk": "^8.0.2",
-    "crypto": "^1.0.1",
-    "ethers": "^6.16.0"
+    "@twa-dev/sdk": "^8.0.2"
   },
-  "scripts": {
-    "copy-manifest": "node build-templates/web-mobile/copy-manifest-on-build.js",
-    "postbuild": "node build-templates/web-mobile/copy-manifest-on-build.js"
-  }
+  "scripts": {}
 }
