@@ -283,11 +283,10 @@ export class GeneralUI extends Component {
     jumpTG(){
         
         Sound.instance.buttonAudio.play();
-        // 新方法：使用 Telegram WebApp API，不会退出 mini app
         const shareUrl = "https://t.me/XDivingOfficial";
         
         // 检查是否在 Telegram 环境
-        if (window.Telegram && window.Telegram.WebApp) {
+        if (Manager.TGEnvironment) {
             window.Telegram.WebApp.openTelegramLink(shareUrl);
         } else {
             // 非 Telegram 环境的备用方案
@@ -299,16 +298,10 @@ export class GeneralUI extends Component {
     jumpX(){
         
         Sound.instance.buttonAudio.play();
-        // 新方法：使用 Telegram WebApp API，不会退出 mini app
+
         const shareUrl = "https://x.com/XDIVING_Global";
         
-        // 检查是否在 Telegram 环境
-        if (window.Telegram && window.Telegram.WebApp) {
-            sys.openURL(shareUrl);
-        } else {
-            // 非 Telegram 环境的备用方案
-            sys.openURL(shareUrl);
-        }
+        sys.openURL(shareUrl);
     }
 
     copy(){

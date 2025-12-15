@@ -153,6 +153,9 @@
     "lockFrame": {
       "__id__": 678
     },
+    "lockLabel": {
+      "__id__": 681
+    },
     "checkInFrame": {
       "__id__": 144
     },
@@ -5560,7 +5563,7 @@
       "__id__": 89
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 137

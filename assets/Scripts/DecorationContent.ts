@@ -29,6 +29,7 @@ export class DecorationContent extends Component {
     receivedNode:Node=null;
 
     decorationIndex:number=0;
+    price:number=0;
 
     purchase(){
         this.aquarium.purchaseDecoration(this);

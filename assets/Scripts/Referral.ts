@@ -185,7 +185,7 @@ export class Referral extends Component {
         const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(this.url);
         
         // 检查是否在 Telegram 环境
-        if (window.Telegram && window.Telegram.WebApp) {
+        if (Manager.TGEnvironment) {
             window.Telegram.WebApp.openTelegramLink(shareUrl);
         } else {
             // 非 Telegram 环境的备用方案

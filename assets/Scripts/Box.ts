@@ -115,7 +115,7 @@ export class Box extends Component {
         this.remainKG=Manager.aquariumBaseData.data[Manager.aquariumLevelData.data.level-1].capacity-Manager.usedCapacity;
         
         // 根据用户等级设置 lock 和 kgNumLabel 的显示
-        let isLevel15OrAbove = Manager.userData && Manager.userData.data && Manager.userData.data.level >= 15;
+        let isLevel15OrAbove = Manager.userData && Manager.userData.data && Manager.userData.data.level >= Manager.aquariumLockLevel;
         if(isLevel15OrAbove){
             // 达到15级：lock 不显示，kgNumLabel 显示
             if(this.lockNode){
@@ -237,7 +237,7 @@ export class Box extends Component {
     updateKG(kg:number){
         this.totalKG+=kg;
         // 更新 kgNumLabel 的值为 totalKG/remainKG
-        this.kgNumLabel.string=this.totalKG.toFixed(2)+"/"+this.remainKG.toFixed(2)+"kg";
+        this.kgNumLabel.string=this.totalKG.toFixed(2)+"/"+this.remainKG.toString()+"kg";
         if(this.totalKG>this.remainKG){
             this.kgNumLabel.color=color(255,0,0);
         }
@@ -247,14 +247,19 @@ export class Box extends Component {
     }
 
     deposit(){//把鱼箱的鱼存入水族箱
-        Sound.instance.buttonAudio.play();
         
         // 如果未达到15级，不执行功能
         if(!Manager.userData || !Manager.userData.data || Manager.userData.data.level < 15){
             return;
         }
-        
-        let aquariumIdentifier=parseInt(Manager.aquariumFishData.data[Manager.aquariumFishData.data.length-1].identifiers);
+        if(this.totalKG>this.remainKG){
+            return;
+        }
+        Sound.instance.buttonAudio.play();
+        let aquariumIdentifier=0;
+        if(Manager.aquariumFishData.data.length>0){
+            aquariumIdentifier=parseInt(Manager.aquariumFishData.data[Manager.aquariumFishData.data.length-1].identifiers);
+        }
         let depositFishData={identifiers:[]};
     
         for (let i = this.boxContents.length - 1; i >= 0; i--) {
@@ -262,7 +267,7 @@ export class Box extends Component {
             if (boxContent.selecting == true) {
                 aquariumIdentifier++;
                 let boxdentifier=boxContent.getComponent(BoxContent).identifier;
-                depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString()});
+                //depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString()});
                 boxContent.node.destroy();
                 let fishData=Manager.boxData.data[i];
                 // 从 fishBaseData 数组中查找匹配的鱼数据（fishBaseData.data 是数组，不是对象，需要用 find 查找）
@@ -281,7 +286,8 @@ export class Box extends Component {
                     feedCount:0,
                     claimCount:0,
                     feedCost:feedCost,
-                    claimRewrdAmount:claimRewardAmount});
+                    claimRewardAmount:claimRewardAmount});
+                Manager.usedCapacity+=fishData.weight;
                 depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString(),feedCost:feedCost,claimRewardAmount:claimRewardAmount});
                 Manager.boxData.data.splice(i,1);
                 this.boxContents.splice(i, 1); 

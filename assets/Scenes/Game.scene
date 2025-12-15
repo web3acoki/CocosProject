@@ -284,7 +284,7 @@
       }
     ],
     "fishPrefab": {
-      "__uuid__": "4169d49e-8843-46ef-9fd5-0782ac17e317",
+      "__uuid__": "1c098982-0d33-4e50-8753-3e725eef892d",
       "__expectedType__": "cc.Prefab"
     },
     "propSprites": [
@@ -40285,7 +40285,7 @@
         "__id__": 1121
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 1124

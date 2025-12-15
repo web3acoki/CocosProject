@@ -48,14 +48,12 @@ export class CheckInContent extends Component {
     }
 
     checkIn(){
-        
         Sound.instance.buttonAudio.play();
         let url="https://api.xdiving.io/api/checkin/"+Manager.userData.data.userId.toString();
             Manager.getInstance().post(url,
-            Manager.startData,
+            {},
             (data) => {
               console.log('签到数据:', data);
-              console.log(Manager.startData);
               },
               (error) => {
                   console.log(`'签到数据POST失败: ${error}`);

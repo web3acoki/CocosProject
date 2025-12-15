@@ -21,7 +21,6 @@ export class Aquarium extends Component {
     @property(GeneralUI)
     generalUI:GeneralUI=null;
 
-    
     @property(Node)
     aquariumBoundary:Node=null;
 
@@ -29,7 +28,6 @@ export class Aquarium extends Component {
     fishContentPrefab:Prefab=null;
     @property(Node)
     fishContentNode:Node=null;
-
 
     @property(Node)
     fishDetailsContentNode:Node=null;
@@ -113,7 +111,6 @@ export class Aquarium extends Component {
     }
 
     update(deltaTime: number) {
-        
     }
 
     select(content:any){
@@ -122,7 +119,7 @@ export class Aquarium extends Component {
     getReward(){
     }
 
-    initFish(){
+    initFish(){//初始化水族箱鱼
         for(let index=0;index<Manager.aquariumFishData.data.length;index++){
             let fishData=Manager.aquariumFishData.data[index];
             let fishInstance = instantiate(this.fishContentPrefab);
@@ -212,7 +209,6 @@ export class Aquarium extends Component {
                     break;
                 }
             }
-            
             // 设置 rarity label
             for(let i=0; i<Manager.rarityBaseData.data.length; i++){
                 if(fishData.rarity == Manager.rarityBaseData.data[i].rarity){
@@ -229,7 +225,75 @@ export class Aquarium extends Component {
             detailContent.fishNameLabel.string = fishData.fishNameEn.toString();
             detailContent.weightNumLabel.string = fishData.weight.toFixed(2);
             detailContent.priceNumLabel.string = fishData.price.toString();
+            // 根据天数显示不同格式：1天显示"/day"，其他显示"/Xdays"
+            detailContent.rewardLabel.string = fishData.claimRewardAmount.toString() + "/day";
+            //let feedCostDaySuffix = fishBaseData.feedingFrequency === 1 ? "/day" : "/" + fishBaseData.feedingFrequency.toString() + "days";
+            detailContent.feedCostLabel.string = fishData.feedCost.toString() ;
+            detailContent.totalLife = fishBaseData.life;
+            let putInAquariumTime = fishData.putInAquariumTime;//放入时间（s）
+            let currentTime = Math.floor(Date.now() / 1000); // 当前时间（s）
+            console.log("putInAquariumTime:"+putInAquariumTime);
+            console.log("currentTime:"+currentTime);
+            let timeDiff = currentTime - putInAquariumTime; // 时间差(s)
+            let liveLife=timeDiff / (60 * 60 * 24);//存活生命(d)
+            // 计算剩余生命值：精确到秒，转换为天数（fishBaseData.life 以天为单位）
+            detailContent.totalLife = fishBaseData.life;
+            detailContent.remainingLife = detailContent.totalLife - liveLife; // 剩余生命(d)
+            // 显示剩余生命值（remainingLife）：转换为小时，然后计算天数和小时数（只显示到小时，向下取整）
+            let remainingHours = Math.floor(detailContent.remainingLife * 24); // 剩余生命（h）
+            let days = Math.floor(remainingHours / 24); // 完整天数
+            let hours = remainingHours % 24; // 剩余小时数
+            // 只显示到小时，如果d或h为0则不显示对应值
+            let timeString = "";
+            if (days > 0) {
+                timeString += days.toString() + "d";
+                if (hours > 0) {
+                    timeString += " " + hours.toString() + "h";
+                }
+            } else if (hours > 0) {
+                timeString = hours.toString() + "h";
+            } else {
+                timeString = "0h";
+            }
+            detailContent.lifeLabel.string = timeString;
+            detailContent.lifeBar.progress = detailContent.remainingLife/detailContent.totalLife;
+
+            detailContent.feedCount = fishData.feedCount;
+            detailContent.claimCount = fishData.claimCount;
+
+            detailContent.totalSatiety = fishBaseData.feedingFrequency;
+            detailContent.needFeedCount = Math.floor(liveLife/fishBaseData.feedingFrequency);
             
+            console.log("liveLife:", liveLife);
+            console.log("fishBaseData.feedingFrequency:", fishBaseData.feedingFrequency);
+            console.log("detailContent.needFeedCount:", detailContent.needFeedCount);
+            console.log("detailContent.feedCount:", detailContent.feedCount);
+            if(detailContent.needFeedCount>detailContent.feedCount){
+                detailContent.remainingSatiety = liveLife - detailContent.totalSatiety*detailContent.feedCount;
+            }
+            else{
+                detailContent.remainingSatiety = detailContent.totalSatiety;
+            }
+            remainingHours = Math.floor(detailContent.remainingSatiety * 24);
+            days = Math.floor(remainingHours / 24);
+            hours = remainingHours % 24;
+            console.log("remainingHours:", remainingHours);
+            console.log("days:", days);
+            console.log("hours:", hours);
+            timeString = "";
+            if (days > 0) {
+                timeString += days.toString() + "d";
+                if (hours > 0) {
+                    timeString += " " + hours.toString() + "h";
+                }
+            } else if (hours > 0) {
+                timeString = hours.toString() + "h";
+            } else {
+                timeString = "0h";
+            }
+            detailContent.satietyLabel.string = timeString;
+            detailContent.satietyBar.progress = detailContent.remainingSatiety/detailContent.totalSatiety;
+
             // 设置奖励类型（diamonds 或 gold）
             if(fishData.type == "diamonds"){
                 detailContent.diamondSprite.active = true;
@@ -246,12 +310,13 @@ export class Aquarium extends Component {
             
             // 设置 feedCost 和 reward
             detailContent.feedCost = fishData.feedCost;
-            detailContent.reward = fishData.claimRewrdAmount;
+            detailContent.reward = fishData.claimRewardAmount;
             
             this.detailContentsMap.set(fishData.identifiers, detailContent);
             this.fishDetailsContentNode.addChild(detailInstance);
         }
     }
+
 
     destroyFish(identifier:string){
         let fishContent = this.fishContentsMap.get(identifier);
@@ -268,11 +333,13 @@ export class Aquarium extends Component {
         }
     }
 
-    initDecoration(){
-        
-        let upgradeContent = instantiate(this.decorationContentPrefab).getComponent(DecorationContent);
+    initDecoration(){//初始化装饰界面
+        this.decorationContents=[];
+        this.decorationContentNode.removeAllChildren();
+
+        let upgradeContent = instantiate(this.decorationContentPrefab).getComponent(DecorationContent);//初始化水族箱升级
         let level=Manager.aquariumLevelData.data.level;
-        console.log("level:"+level);
+        upgradeContent.aquarium=this;
         upgradeContent.nameLabel.string="Used:"+Manager.usedCapacity.toFixed(2)+"kg";
         upgradeContent.buttonLabel.string="Upgrade";
         if(level==Manager.aquariumBaseData.data.length){
@@ -281,6 +348,7 @@ export class Aquarium extends Component {
             upgradeContent.buttonNode.active=false;
             // 已满级，不需要显示价格
             upgradeContent.priceLabel.string="";
+            upgradeContent.price=0;
         }
         else{
             upgradeContent.bonusLabel.string="Lv."+level+" Capacity "+Manager.aquariumBaseData.data[level-1].capacity+" kg\n"
@@ -290,6 +358,7 @@ export class Aquarium extends Component {
             // 设置价格，去掉 "X " 符号
             let upgradeCost = Manager.aquariumBaseData.data[level].gold;
             upgradeContent.priceLabel.string=upgradeCost.toString();
+            upgradeContent.price=upgradeCost;
             // 如果金钱不足，显示为红色（使用coins）
             if(Manager.userData && Manager.userData.data && Manager.userData.data.coins < upgradeCost){
                 upgradeContent.priceLabel.color = color(255, 0, 0);
@@ -302,11 +371,11 @@ export class Aquarium extends Component {
         this.decorationContents.push(upgradeContent);
         this.decorationContentNode.addChild(upgradeContent.node);
 
-        for(let index=0;index<Manager.decorationBaseData.data.length;index++){
+        for(let index=0;index<Manager.decorationBaseData.data.length;index++){//初始化水族箱装饰
 
             let decorationContent = instantiate(this.decorationContentPrefab).getComponent(DecorationContent);
             let decorationData=Manager.decorationBaseData.data[index];
-
+            decorationContent.aquarium=this;
             // 改变 decorationContent 的 sprite
             if(index < this.decorationSpriteFrames.length){
                 decorationContent.sprite.spriteFrame=this.decorationSpriteFrames[index];
@@ -317,6 +386,9 @@ export class Aquarium extends Component {
                 // 未购买：显示购买按钮
                 decorationContent.receivedNode.active=false;
                 decorationContent.buttonNode.active=true;
+                if(index < this.dacorationNodes.length){
+                    this.dacorationNodes[index].active = false;
+                }
             }
             else if(Manager.decorationData.data[index].status==1){
                 // 已购买：隐藏购买按钮，显示装饰节点
@@ -328,11 +400,12 @@ export class Aquarium extends Component {
                 }
             }
             //decorationContent.aquarium=this;
-            decorationContent.decorationIndex=index;
+            decorationContent.decorationIndex=index+1;
             decorationContent.nameLabel.string=decorationData.decorationName;
             decorationContent.bonusLabel.string="Diamond production increased by "+((decorationData.bonus*100).toFixed(2))+"%";
-            // 设置价格，去掉 "X " 符号
+            // 设置价格
             decorationContent.priceLabel.string=decorationData.price.toString();
+            decorationContent.price=decorationData.price;
             // 如果金钱不足，显示为红色（使用coins）
             if(Manager.userData && Manager.userData.data && Manager.userData.data.coins < decorationData.price){
                 decorationContent.priceLabel.color = color(255, 0, 0);
@@ -349,13 +422,23 @@ export class Aquarium extends Component {
     switchPage(page:'decoration'|'aquarium'|'fishDetails'){
         // 如果已经是当前页面，直接返回
         if(this.currentPage === page){
-            return;
+            if(page=='decoration'){
+                this.currentPage = 'aquarium';
+            }
+            else if(page=='fishDetails'){
+                this.currentPage = 'aquarium';
+            }
+            else if(page=='aquarium'){
+                return;
+            }
+        }
+        else{
+            this.currentPage = page;
         }
         
         Sound.instance.buttonAudio.play();
         
         // 更新当前页面
-        this.currentPage = page;
         
         this.topNode.active = page !== 'aquarium';
         
@@ -390,6 +473,47 @@ export class Aquarium extends Component {
     }
 
     purchaseDecoration(content:DecorationContent){
+        if(content.decorationIndex==0){
+            this.upgradeAquarium();
+        }
+        else{
+            if(Manager.userData.data.coins >= content.price){
+                Sound.instance.buttonAudio.play();
+                Manager.userData.data.coins -= content.price;
+                Manager.decorationData.data[content.decorationIndex-1].status = 1;
+
+                this.initDecoration();
+                this.updateDataDisplay();
+                Manager.getInstance().post('https://api.xdiving.io/api/aquarium/decoration',
+                {decorationId:content.decorationIndex},
+                (data) => {
+                    console.log('购买装饰数据:', data);
+                    console.log(content.decorationIndex);
+                },
+                (error) => {
+                    console.log(`购买装饰数据POST失败: ${error}`);
+                })
+            }
+        }
+    }
+    
+    upgradeAquarium(){
+        if(Manager.userData.data.coins >= Manager.aquariumBaseData.data[Manager.aquariumLevelData.data.level-1].gold){
+            Sound.instance.buttonAudio.play();
+            Manager.userData.data.coins -= Manager.aquariumBaseData.data[Manager.aquariumLevelData.data.level-1].gold;
+            Manager.aquariumLevelData.data.level++;
+            Manager.getInstance().post('https://api.xdiving.io/api/aquarium/upgrade',
+            {},
+            (data) => {
+                console.log('升级数据:', data);
+                console.log(Manager.aquariumLevelData);
+            },
+            (error) => {
+                console.log(`升级数据POST失败: ${error}`);
+            })
+            this.initDecoration();
+            this.updateDataDisplay();
+        }   
     }
 
     back(){

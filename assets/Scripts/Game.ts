@@ -95,6 +95,7 @@ export class Game extends Component {
         this.generalUI.updateDisplay();
         this.generalUI.updateLevel();
 
+
         for(let index=0;index<this.choosePropNode.children.length;index++){
           let gameContent = this.choosePropNode.children[index].getComponent(GameContent);
           gameContent.index = index;
@@ -222,7 +223,7 @@ export class Game extends Component {
 
                 fishComponent.game=this.node.getComponent(Game);
 
-                let boundary=this.spawnBoundarys[Math.round(fishData.spawnRegion)];
+                let boundary=this.spawnBoundarys[index];
                 fishComponent.spawnBoundary=boundary;
                 
                 fishComponent.bloodSkeleton.node.setScale(fishComponent.utSize/100, fishComponent.utSize/100, 1);

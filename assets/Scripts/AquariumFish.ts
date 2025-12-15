@@ -71,22 +71,23 @@ export class AquariumFish extends Component {
                 // 检查是否超出左边界
                 if(left < this.aquariumBoundary.left){
                     needTurn = true;
-                    newAngle = randomRange(-45, 45);  // 向右转
+                    newAngle = randomRange(135, 225);  // 向右转（180度左右）
+                    
                 }
                 // 检查是否超出右边界
                 else if(right > this.aquariumBoundary.right){
                     needTurn = true;
-                    newAngle = randomRange(135, 225);  // 向左转
+                    newAngle = randomRange(-45, 45);  // 向左转（0度左右）
                 }
                 // 检查是否超出上边界
                 else if(up > this.aquariumBoundary.up){
                     needTurn = true;
-                    newAngle = randomRange(225, 315);  // 向下转
+                    newAngle = randomRange(45, 135);  // 向下转（90度左右）
                 }
                 // 检查是否超出下边界
                 else if(down < this.aquariumBoundary.down){
                     needTurn = true;
-                    newAngle = randomRange(45, 135);  // 向上转
+                    newAngle = randomRange(225, 315);  // 向上转（270度左右）
                 }
                 
                 if(needTurn){

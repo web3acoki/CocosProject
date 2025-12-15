@@ -97,7 +97,6 @@ export class Quest extends Component {
         let unclaims:Node[]=[];
         for(let index=0;index<Manager.questData.data.length;index++){
             if(Manager.questData.data[index].questStatus<5){
-                let identifier=Manager.questData.data[index].identifier-9006;
                 let questContentInstance = this.createQuestContent(index);
                 switch(Manager.questData.data[index].questStatus){
                     case 1:
@@ -155,8 +154,6 @@ export class Quest extends Component {
                 Manager.userData.data.coins+=Manager.questBaseData.data[index].rewardQuantity;
             }
             this.generalUI.updateDisplay();
-            
-            console.log("get");
             if(Manager.questBaseData.data[index].type=="Achievements")
                 {
                     let newIndex=index+1;
@@ -261,7 +258,6 @@ export class Quest extends Component {
     }
     
     createQuestContent(index:number){
-        console.log(index);
         let questContentInstance = instantiate(this.questContentPrefab);
         let questComponent=questContentInstance.getComponent(QuestContent);
         questComponent.quest=this;
@@ -314,7 +310,7 @@ export class Quest extends Component {
         const shareText = "Come and play X-Diver with me!";
         
         // 检查是否在 Telegram 环境
-        if (window.Telegram && window.Telegram.WebApp) {
+        if (Manager.TGEnvironment) {
             const webApp = window.Telegram.WebApp;
             
             // 尝试使用 shareUrl 方法（如果支持）
@@ -355,7 +351,7 @@ export class Quest extends Component {
         const shareText = "Recommend an incredibly fun game X-Diver！";
         
         // 检查是否在 Telegram 环境
-        if (window.Telegram && window.Telegram.WebApp) {
+        if (Manager.TGEnvironment) {
             const webApp = window.Telegram.WebApp;
             
             // 尝试使用 shareUrl 方法（如果支持）

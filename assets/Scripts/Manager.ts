@@ -38,8 +38,6 @@ interface FishBaseData {
     feedingFrequency:number;
     feedingPrice:number;
     reward:number;
-
-
 }
 
 interface EquipmentDataResponse{//装备基础数据
@@ -185,8 +183,8 @@ interface changeNameRequest{//修改名字
 //    identifier:number;
 //}
 
-interface StartRequest{//游戏开始
-}
+//interface StartRequest{//游戏开始
+//}
 
 interface EndRequest{//游戏结束
     userId:number;
@@ -293,12 +291,12 @@ interface aquariumFishData{
     price:number;
     type:string;
     rarity:string;
+
     putInAquariumTime:number;//放入时间
     feedCount:number;//投喂次数
     claimCount:number;
     feedCost:number;
-    claimRewrdAmount:number;
-
+    claimRewardAmount:number;
 }
 interface decorationResponse{//用户水族箱装饰数据
     data:decorationData[];
@@ -338,9 +336,9 @@ interface User{
     timeStamp:number;//登录时间戳
 }
 
-interface topupRespond{
-    status:boolean;
-}
+//interface topupRespond{
+//    status:boolean;
+//}
 
 interface InitRequest{//初始化信息
     initData:string;
@@ -400,6 +398,9 @@ export class Manager extends Component {
     public static getInstance(): Manager {
         return Manager.instance;
     }
+
+    public static TGEnvironment:boolean=true;
+    public static aquariumLockLevel:number=15;
     
     public static fishBaseData:FishDataResponse;
     public static equipmentBaseData:EquipmentDataResponse;
@@ -429,7 +430,7 @@ export class Manager extends Component {
     public static setData:setRequest={BGMopen:true,BGSopen:false};
     public static checkIn:CheckInRequest={};
     public static changeNameData:changeNameRequest={displayUsername:""};
-    public static startData:StartRequest={};
+    //public static startData:StartRequest={};
     public static endData:EndRequest;
     public static sellFishData:sellFishRequest;
     public static upgradeData:upgradeRequest={equipmentId:1};
@@ -526,7 +527,7 @@ export class Manager extends Component {
             this.adjustAspect();
         }, 0.1);
         
-        this.initWallet().catch(err => console.error('钱包初始化失败:', err));
+        //this.initWallet().catch(err => console.error('钱包初始化失败:', err));
         this.loadBaseData();
         this.initTGUser();
     ////////////////////////////
@@ -673,8 +674,12 @@ export class Manager extends Component {
         //this.getTest(3);
         let initData=WebApp['default'].initData;
         if(initData){
+            Manager.TGEnvironment=true;
             Manager.initRequest={initData:initData};
             this.initUser();
+        }
+        else{
+            Manager.TGEnvironment=false;
         }
         //Manager.testAuthdate=WebApp['default'].initDataUnsafe.auth_date.toString();
         //Manager.testUserId=WebApp['default'].initDataUnsafe.user.id.toString();
@@ -816,11 +821,9 @@ export class Manager extends Component {
     }
 
     initAquarium(){
-
-
-        //for(let index=0;index<Manager.aquariumFishData.data.length;index++){
-        //    Manager.usedCapacity+=Manager.aquariumFishData.data[index].fishData.weight;
-        //}
+        for(let index=0;index<Manager.aquariumFishData.data.length;index++){
+            Manager.usedCapacity+=Manager.aquariumFishData.data[index].weight;
+        }
     }
 
     //loadEquip(){

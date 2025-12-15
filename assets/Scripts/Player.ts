@@ -334,10 +334,10 @@ export default class Player extends Component {
     let mapID=1;
     let url="https://api.xdiving.io/api/diving-session/user/"+this.userId.toString()+"/game-start/"+mapID.toString();
     Manager.getInstance().post(url,
-    Manager.startData,
+    {},
     (data) => {
       console.log('开始数据:', data);
-      console.log(Manager.startData);
+      //console.log(Manager.startData);
       },
       (error) => {
           console.log(`'开始数据POST失败: ${error}`);
@@ -627,7 +627,7 @@ export default class Player extends Component {
         }
       }
     }
-    this.depth=Math.round(-(this.node.position.y-4660)/60);
+    this.depth=Math.floor(-(this.node.position.y-4660)/60);
     this.depthNumLabel.string=this.depth+"m";
     if(this.littleMap.active){
       this.littlePos.setPosition(new Vec3(this.node.position.x*0.02,this.node.position.y*0.02-96,0));

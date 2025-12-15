@@ -41,6 +41,8 @@ export class Menu extends Component {
     comingSoonFrame: Node = null;
     @property(Node)
     lockFrame:Node=null;
+    @property(Label)
+    lockLabel:Label=null;
     
     @property(Node)
     checkInFrame: Node = null;
@@ -122,6 +124,7 @@ export class Menu extends Component {
     private displayTimer=2;
     private comingSoonTimer=1;
 
+    unlockTime=0;
     //private displayLoaded=false;
 
     start() {
@@ -575,13 +578,19 @@ export class Menu extends Component {
     }
 
     aquarium(){
-        Sound.instance.buttonAudio.play();
-        if(Manager.userData.data.level>=15){
+        this.unlockTime++;
+        if(this.unlockTime>=7){
+            this.unlockTime=0;
+            Manager.aquariumLockLevel=15;
+        }
+        if(Manager.userData.data.level>=Manager.aquariumLockLevel){
+            Sound.instance.buttonAudio.play();
             director.loadScene("Aquarium");
         }
         else{
             // 先取消之前的定时器，防止连续点击时时间不重置
             this.lockFrame.active=true;
+            this.lockLabel.string="Unlock in "+Manager.aquariumLockLevel+" level";
             this.unschedule(this.hideLockFrame);
             this.scheduleOnce(this.hideLockFrame, 1);
         }
