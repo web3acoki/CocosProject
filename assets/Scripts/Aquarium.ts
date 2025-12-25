@@ -343,18 +343,25 @@ export class Aquarium extends Component {
         upgradeContent.nameLabel.string="Used:"+Manager.usedCapacity.toFixed(2)+"kg";
         upgradeContent.buttonLabel.string="Upgrade";
         if(level==Manager.aquariumBaseData.data.length){
-            upgradeContent.bonusLabel.string="Lv."+level+" Capacity "+Manager.aquariumBaseData.data[level-1].capacity+" kg\n";
+            upgradeContent.bonusLabel.string="Lv."+level+" Capacity "+Manager.aquariumBaseData.data[level-1].capacity+" kg";
+            // 已满级时，隐藏 bonusLabel2
+            if(upgradeContent.bonusLabel2){
+                upgradeContent.bonusLabel2.node.active = false;
+            }
             upgradeContent.receivedNode.active=true;
-            upgradeContent.buttonNode.active=false;
+            upgradeContent.goldNode.active=false;
+            //upgradeContent.buttonNode.active=false;
             // 已满级，不需要显示价格
             upgradeContent.priceLabel.string="";
             upgradeContent.price=0;
         }
         else{
-            upgradeContent.bonusLabel.string="Lv."+level+" Capacity "+Manager.aquariumBaseData.data[level-1].capacity+" kg\n"
-            +"Lv."+(level+1).toString()+" Capacity "+Manager.aquariumBaseData.data[level].capacity+" kg";
+            // 第一行显示在 bonusLabel
+            upgradeContent.bonusLabel.string = "Lv."+level+" Capacity "+Manager.aquariumBaseData.data[level-1].capacity+" kg";
+            upgradeContent.bonusLabel2.string = "Lv."+(level+1).toString()+" Capacity "+Manager.aquariumBaseData.data[level].capacity+" kg";
+            upgradeContent.bonusLabel2.node.active = true;
             upgradeContent.receivedNode.active=false;
-            upgradeContent.buttonNode.active=true;
+            upgradeContent.goldNode.active=true;
             // 设置价格，去掉 "X " 符号
             let upgradeCost = Manager.aquariumBaseData.data[level].gold;
             upgradeContent.priceLabel.string=upgradeCost.toString();
@@ -385,7 +392,7 @@ export class Aquarium extends Component {
             if(Manager.decorationData.data[index].status==0){
                 // 未购买：显示购买按钮
                 decorationContent.receivedNode.active=false;
-                decorationContent.buttonNode.active=true;
+                decorationContent.goldNode.active=true;
                 if(index < this.dacorationNodes.length){
                     this.dacorationNodes[index].active = false;
                 }
@@ -393,7 +400,8 @@ export class Aquarium extends Component {
             else if(Manager.decorationData.data[index].status==1){
                 // 已购买：隐藏购买按钮，显示装饰节点
                 decorationContent.receivedNode.active=true;
-                decorationContent.buttonNode.active=false;
+                decorationContent.goldNode.active=false;
+                //decorationContent.buttonNode.active=false;
                 // 如果 status 为 1，设置对应的 decorationNodes 为 active
                 if(index < this.dacorationNodes.length){
                     this.dacorationNodes[index].active = true;

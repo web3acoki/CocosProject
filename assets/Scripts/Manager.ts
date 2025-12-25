@@ -7,6 +7,14 @@ import WebApp from '@twa-dev/sdk'
 import { TelegramWebApp } from '../cocos-telegram-miniapps/scripts/telegram-web';
 // 钱包功能已迁移到 Manager 中
 import { TonConnectUI } from '@ton/cocos-sdk';
+
+//import  PrivyClient, { LocalStorage } from '@privy-io/js-sdk-core';
+
+//const privy=new PrivyClient({
+//    appId: 'cmjksvwjy05n3l40c0s99jnse',
+//    storage: new LocalStorage(),
+//});
+
 // 旧钱包功能已停用
 // import { TelegramWalletManager } from './Test/telegram-wallet-manager';
 
@@ -400,7 +408,6 @@ export class Manager extends Component {
     }
 
     public static TGEnvironment:boolean=true;
-    public static aquariumLockLevel:number=15;
     
     public static fishBaseData:FishDataResponse;
     public static equipmentBaseData:EquipmentDataResponse;
@@ -507,6 +514,7 @@ export class Manager extends Component {
     private walletInitError: string | null = null;
     private walletInitErrorDetails: any = null;
 
+    // private privy: PrivyClient | null = null;
     //public static
     
     //this.catchSprite.spriteFrame=instantiate(this.game.fishPrefabs[index]).getComponent(Sprite).spriteFrame;
@@ -523,11 +531,12 @@ export class Manager extends Component {
         
         // 调整窗口适配策略：当宽度 > 高度 * 0.652 时，关闭适配屏幕高度，反之打开
         this.adjustAspect();
+        //this.initPrivy();
         this.schedule(() => {
             this.adjustAspect();
         }, 0.1);
         
-        //this.initWallet().catch(err => console.error('钱包初始化失败:', err));
+        this.initWallet().catch(err => console.error('钱包初始化失败:', err));
         this.loadBaseData();
         this.initTGUser();
     ////////////////////////////
@@ -591,6 +600,13 @@ export class Manager extends Component {
             view.setDesignResolutionSize(designSize.width, designSize.height, ResolutionPolicy.FIXED_WIDTH);
         }
     }
+
+    //initPrivy(){
+    //    this.privy=new PrivyClient({
+    //        appId: 'cmjksvwjy05n3l40c0s99jnse',
+    //        storage: new LocalStorage(),
+    //    });
+    //}
 
     postTest(testText:string){
         let testData={
@@ -796,6 +812,9 @@ export class Manager extends Component {
     }
 
     initLevel(){
+   // 先清空数组
+        Manager.levelStatusDatas = [];
+        
         for(let index=0;index<Manager.levelBaseData.data.length;index++){
             if(index<Manager.userData.data.level){
                 if(Manager.userData.data.vip){
@@ -821,6 +840,9 @@ export class Manager extends Component {
     }
 
     initAquarium(){
+        // 先重置 usedCapacity
+        Manager.usedCapacity = 0;
+        
         for(let index=0;index<Manager.aquariumFishData.data.length;index++){
             Manager.usedCapacity+=Manager.aquariumFishData.data[index].weight;
         }
@@ -1271,5 +1293,50 @@ export class Manager extends Component {
         
         return null;
     }
-    // ========== 钱包功能结束 ==========
+    // ========== 原版钱包功能结束 ==========
+    //async loginWithTelegram() {
+    //    try {
+    //        // 1. 初始化 OAuth 流程
+    //        // redirectUrl 必须是你在 Privy Dashboard 注册的合法域名地址
+    //        const redirectUrl = "https://your-game-domain.com/"; 
+    //        
+    //        // 调用 OAuth 登录
+    //        await this.privy.auth.loginWithOAuth({
+    //            provider: 'telegram',
+    //            redirectUrl: redirectUrl
+    //        });
+    //        
+    //        // 执行后，浏览器会自动跳转到 Telegram 的授权页面
+    //    } catch (error) {
+    //        console.error("发起 Telegram 登录失败:", error);
+    //    }
+    //}
+    //
+    //async handleAfterLogin() {
+    //    // 检查是否已经登录成功
+    //    const user = await this.privy.user.get();
+    //    const wallet =await this.privy.wallet.get();
+    //    
+    //    if (user) {
+    //        // 1. 获取 Telegram 用户 ID
+    //        // 在 linked_accounts 数组中查找类型为 'telegram' 的账户
+    //        const telegramAccount = user.linked_accounts.find(acc => acc.type === 'telegram');
+    //        if (telegramAccount) {
+    //            const telegramUserId = telegramAccount.telegram_user_id; // 这就是 Telegram ID
+    //            console.log("Telegram User ID:", telegramUserId);
+    //        }
+    //
+    //        // 2. 获取 Privy 钱包 ID (Address)
+    //        // 查找嵌入式钱包或已链接的钱包
+    //        const walletAccount = user.linked_accounts.find(acc => 
+    //            acc.type === 'wallet' && acc.connector_type === 'embedded'
+    //        );
+    //        
+    //        if (walletAccount) {
+    //            const walletAddress = walletAccount.address; // 钱包公钥地址
+    //            const walletId = walletAccount.id; // Privy 内部的钱包唯一标识
+    //            console.log("Wallet Address:", walletAddress);
+    //        }
+    //    }
+    //}
 }

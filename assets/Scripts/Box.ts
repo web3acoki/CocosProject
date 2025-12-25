@@ -1,4 +1,4 @@
-import { _decorator, AudioSource, color, Component, director, instantiate, Label, Node, Prefab, SpriteFrame } from 'cc';
+import { _decorator, AudioSource, color, Component, director, instantiate, Label, Node, Prefab, randomRangeInt, SpriteFrame } from 'cc';
 import { Manager } from './Manager';
 import { BoxContent } from './BoxContent';
 import { Sound } from './Sound';
@@ -108,16 +108,28 @@ export class Box extends Component {
     
     updateDataDisplay(){
         this.generalUI.updateDisplay();
+        
+        // 重置金币、钻石和重量相关数据
+        this.coinNumLabel.string="+0";
+        this.diamondNumLabel.string="+0";
+        this.selectAllNode.active=false;
+        this.totalCoins = 0;
+        this.totalDiamonds = 0;
+        this.totalKG = 0;
+        if(this.kgNumLabel && this.kgNumLabel.node.active){
+            this.kgNumLabel.string = "0/" + this.remainKG.toFixed(2) + "kg";
+            this.kgNumLabel.color = color(255, 255, 255);
+        }
     }
 
     initBox(){
         this.updateDataDisplay();
         this.remainKG=Manager.aquariumBaseData.data[Manager.aquariumLevelData.data.level-1].capacity-Manager.usedCapacity;
         
-        // 根据用户等级设置 lock 和 kgNumLabel 的显示
-        let isLevel15OrAbove = Manager.userData && Manager.userData.data && Manager.userData.data.level >= Manager.aquariumLockLevel;
-        if(isLevel15OrAbove){
-            // 达到15级：lock 不显示，kgNumLabel 显示
+        // 根据 userId 是否为 4 设置 lock 和 kgNumLabel 的显示
+        let canUseAquarium = Manager.userData && Manager.userData.data && Manager.userData.data.userId === 4;
+        if(canUseAquarium){
+            // userId 为 4：lock 不显示，kgNumLabel 显示
             if(this.lockNode){
                 this.lockNode.active = false;
             }
@@ -128,7 +140,7 @@ export class Box extends Component {
             }
         }
         else{
-            // 未达到15级：lock 显示，kgNumLabel 不显示
+            // userId 不为 4：lock 显示，kgNumLabel 不显示
             if(this.lockNode){
                 this.lockNode.active = true;
             }
@@ -217,11 +229,12 @@ export class Box extends Component {
         else{
             this.selectAllNode.active=true;
             for(const boxContent of this.boxContents){
-                boxContent.selecting=true;
-                boxContent.selectNode.active=true;
-                this.updateSellNum(boxContent.coin,boxContent.diamond);
-                // 选择时增加 totalKG
-                this.updateKG(boxContent.weight);
+                if(boxContent.selecting==false){
+                    boxContent.selecting=true;
+                    boxContent.selectNode.active=true;
+                    this.updateSellNum(boxContent.coin,boxContent.diamond);
+                    this.updateKG(boxContent.weight);
+                }
             }
         }
     }
@@ -237,7 +250,7 @@ export class Box extends Component {
     updateKG(kg:number){
         this.totalKG+=kg;
         // 更新 kgNumLabel 的值为 totalKG/remainKG
-        this.kgNumLabel.string=this.totalKG.toFixed(2)+"/"+this.remainKG.toString()+"kg";
+        this.kgNumLabel.string=this.totalKG.toFixed(2)+"/"+this.remainKG.toFixed(2)+"kg";
         if(this.totalKG>this.remainKG){
             this.kgNumLabel.color=color(255,0,0);
         }
@@ -246,26 +259,25 @@ export class Box extends Component {
         }
     }
 
-    deposit(){//把鱼箱的鱼存入水族箱
+    deposit(){//存鱼
         
-        // 如果未达到15级，不执行功能
-        if(!Manager.userData || !Manager.userData.data || Manager.userData.data.level < 15){
+        // 如果 userId 不为 4，不执行功能
+        if(!Manager.userData || !Manager.userData.data || Manager.userData.data.userId !== 4){
             return;
         }
         if(this.totalKG>this.remainKG){
             return;
         }
         Sound.instance.buttonAudio.play();
-        let aquariumIdentifier=0;
-        if(Manager.aquariumFishData.data.length>0){
-            aquariumIdentifier=parseInt(Manager.aquariumFishData.data[Manager.aquariumFishData.data.length-1].identifiers);
-        }
+        //let aquariumIdentifier=0;
+        //if(Manager.aquariumFishData.data.length>0){
+        //    aquariumIdentifier=parseInt(Manager.aquariumFishData.data[Manager.aquariumFishData.data.length-1].identifiers);
+        //}
         let depositFishData={identifiers:[]};
     
         for (let i = this.boxContents.length - 1; i >= 0; i--) {
             const boxContent = this.boxContents[i];
             if (boxContent.selecting == true) {
-                aquariumIdentifier++;
                 let boxdentifier=boxContent.getComponent(BoxContent).identifier;
                 //depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString()});
                 boxContent.node.destroy();
@@ -275,25 +287,28 @@ export class Box extends Component {
                 let difficulty=Manager.rarityBaseData.data.find(rarity => rarity.rarity === fishData.rarity).difficulty;
                 // 如果 fishBaseData 中有 feedCost 字段，使用它；否则使用 0
                 let feedCost=Math.floor(fishBaseData.feedingPrice*difficulty);
-                let claimRewardAmount=fishBaseData.reward*difficulty;
-                Manager.aquariumFishData.data.push({identifiers:aquariumIdentifier.toString(),
+                let claimRewardAmount=parseFloat((fishBaseData.reward*difficulty).toFixed(8));
+                let aquariumIdentifier=randomRangeInt(1000000000,9999999999).toString();
+                Manager.aquariumFishData.data.push({identifiers:aquariumIdentifier,
                     fishNameEn:fishData.fishNameEn,
                     weight:fishData.weight,
                     price:fishData.price,
                     type:fishData.type,
                     rarity:fishData.rarity,
-                    putInAquariumTime:Date.now(),
+                    putInAquariumTime:Math.floor(Date.now() / 1000),
                     feedCount:0,
                     claimCount:0,
                     feedCost:feedCost,
                     claimRewardAmount:claimRewardAmount});
                 Manager.usedCapacity+=fishData.weight;
-                depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier.toString(),feedCost:feedCost,claimRewardAmount:claimRewardAmount});
+                depositFishData.identifiers.push({boxIdentifier:boxdentifier,newIdentifier:aquariumIdentifier,feedCost:feedCost,claimRewardAmount:claimRewardAmount});
                 Manager.boxData.data.splice(i,1);
                 this.boxContents.splice(i, 1); 
             }
         }
         if(depositFishData.identifiers.length>0){
+            this.updateDataDisplay();
+            
             Manager.getInstance().post('https://api.xdiving.io/api/aquarium/deposit',
             depositFishData,
             (data) => {
@@ -307,13 +322,11 @@ export class Box extends Component {
         }
     }
 
-    sell(){
+    sell(){//卖鱼
         Sound.instance.buttonAudio.play();
-        this.coinNumLabel.string="+0";
-        this.diamondNumLabel.string="+0";
-        this.selectAllNode.active=false;
         Manager.userData.data.coins+=this.totalCoins;
         Manager.userData.data.diamonds+=this.totalDiamonds;
+        
         this.updateDataDisplay();
 
         Manager.sellFishData={userId:Manager.userData.data.userId,identifiers:[]}

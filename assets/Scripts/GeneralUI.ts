@@ -1,6 +1,8 @@
 import { _decorator, Component, EditBox, Label, Node, ProgressBar, color, sys } from 'cc';
 import { Manager } from './Manager';
 import { Sound } from './Sound';
+
+import { TelegramWebApp } from '../cocos-telegram-miniapps/scripts/telegram-web';
 const { ccclass, property } = _decorator;
 
 @ccclass('GeneralUI')
@@ -285,12 +287,22 @@ export class GeneralUI extends Component {
         Sound.instance.buttonAudio.play();
         const shareUrl = "https://t.me/XDivingOfficial";
         
-        // 检查是否在 Telegram 环境
-        if (Manager.TGEnvironment) {
-            window.Telegram.WebApp.openTelegramLink(shareUrl);
-        } else {
-            // 非 Telegram 环境的备用方案
-            sys.openURL(shareUrl);
+        // 尝试使用 TelegramWebApp 的 openTelegramLink 方法
+        const success = TelegramWebApp.Instance.openTelegramLink(shareUrl);
+        if (!success) {
+            // 如果 TelegramWebApp 未初始化或调用失败，使用备用方案
+            if (Manager.TGEnvironment && window.Telegram && window.Telegram.WebApp) {
+                // 使用 openLink 方法在 Telegram 内部打开链接，不会退出 mini app
+                if (typeof window.Telegram.WebApp.openLink === 'function') {
+                    window.Telegram.WebApp.openLink(shareUrl);
+                } else {
+                    // 如果 openLink 不可用，使用 sys.openURL
+                    sys.openURL(shareUrl);
+                }
+            } else {
+                // 非 Telegram 环境的备用方案
+                sys.openURL(shareUrl);
+            }
         }
     }
 

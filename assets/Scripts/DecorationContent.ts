@@ -17,16 +17,19 @@ export class DecorationContent extends Component {
     bonusLabel:Label=null;
 
     @property(Label)
+    bonusLabel2:Label=null;
+
+    @property(Label)
     priceLabel:Label=null;
 
     @property(Label)
     buttonLabel:Label=null;
 
     @property(Node)
-    buttonNode:Node=null;
+    receivedNode:Node=null;
 
     @property(Node)
-    receivedNode:Node=null;
+    goldNode:Node=null;
 
     decorationIndex:number=0;
     price:number=0;

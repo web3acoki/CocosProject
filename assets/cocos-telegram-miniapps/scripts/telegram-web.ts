@@ -76,12 +76,13 @@ export class TelegramWebApp {
         }
     }
 
-    public openTelegramLink(url: string) {
+    public openTelegramLink(url: string): boolean {
         if (!this._tgWebAppJS) {
             console.error("telegram web app is not inited!");
-            return;
+            return false;
         }
         this._tgWebAppJS.openTelegramLink(url);
+        return true;
     }
 
     public share(url: string, text?: string) {

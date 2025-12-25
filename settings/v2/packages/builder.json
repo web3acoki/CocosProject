@@ -30,5 +30,16 @@
         }
       }
     }
+  },
+  "splash-setting": {
+    "logo": {
+      "type": "none",
+      "image": "project://settings/loading.png"
+    },
+    "background": {
+      "type": "default"
+    },
+    "totalTime": 500,
+    "displayRatio": 1
   }
 }

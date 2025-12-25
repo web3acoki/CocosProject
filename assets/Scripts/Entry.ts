@@ -118,4 +118,7 @@ export class Entry extends Component {
         this.userIdInput.node.active=!this.userIdInput.node.active;
     }
 
+    privyLogin(){
+        sys.openURL('http://localhost:3000/');
+    }
 }

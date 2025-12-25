@@ -124,12 +124,10 @@ export class Menu extends Component {
     private displayTimer=2;
     private comingSoonTimer=1;
 
-    unlockTime=0;
     //private displayLoaded=false;
 
     start() {
         //this.standMan.children[0].active=true;
-        
 
         Sound.instance.moveAudio.stop();
         Sound.instance.stayAudio.stop();
@@ -147,9 +145,14 @@ export class Menu extends Component {
         director.preloadScene("Game");
         director.preloadScene("Aquarium");
         
-        if(Manager.userData.data.level<15){
-            this.lockNode.active=true;
+        // 根据 userId 是否为 4 设置锁图标
+        if(Manager.userData.data.userId === 4){
+            this.lockNode.active = false;
         }
+        else{
+            this.lockNode.active = true;
+        }
+        
         this.initProp();
         this.updateDataDisplay();
         this.updateHint();
@@ -199,7 +202,6 @@ export class Menu extends Component {
         for(const checkInContent of this.checkInContentNode.children){
             checkInContent.getComponent(CheckInContent).updateCheckIn();
         }
-
 
         for(const propContent of this.propContentNode.children){
             propContent.getComponent(PropContent).updateDataDisplay();
@@ -543,7 +545,7 @@ export class Menu extends Component {
     //    }
     //}
     
-    chooseMap(){
+    chooseMap(){//点击选择地图
         if(this.mapChosed==false){
             Sound.instance.buttonAudio.play();
             this.mapChosed=true;
@@ -578,21 +580,16 @@ export class Menu extends Component {
     }
 
     aquarium(){
-        this.unlockTime++;
-        if(this.unlockTime>=7){
-            this.unlockTime=0;
-            Manager.aquariumLockLevel=15;
-        }
-        if(Manager.userData.data.level>=Manager.aquariumLockLevel){
-            Sound.instance.buttonAudio.play();
+        Sound.instance.buttonAudio.play();
+        // 检查 userId 是否为 4
+        if(Manager.userData.data.userId === 4){
             director.loadScene("Aquarium");
         }
         else{
-            // 先取消之前的定时器，防止连续点击时时间不重置
-            this.lockFrame.active=true;
-            this.lockLabel.string="Unlock in "+Manager.aquariumLockLevel+" level";
-            this.unschedule(this.hideLockFrame);
-            this.scheduleOnce(this.hideLockFrame, 1);
+            // 显示锁图标和 comingSoon
+            this.lockNode.active = true;
+            this.comingSoonFrame.active=true;
+            this.comingSoonTimer=1;
         }
     }
 

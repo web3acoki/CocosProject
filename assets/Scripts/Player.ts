@@ -480,10 +480,17 @@ export default class Player extends Component {
   consumeProp(curPropIndex:number){
     
     if(Manager.propData.data[curPropIndex].quantity>0){
-      Sound.instance.boostAudio.play();
       //this.propNumber--;
       Manager.propData.data[curPropIndex].quantity--;
-      this.game.curPropContent.getComponent(GameContent).propNumLabel.string="x"+Manager.propData.data[curPropIndex].quantity.toString();
+      
+      // 更新所有 gameContent 的数量文本（包括 choosePropNode 中的和 curPropContent）
+      for(let index=0;index<this.game.choosePropNode.children.length;index++){
+        let gameContent = this.game.choosePropNode.children[index].getComponent(GameContent);
+        gameContent.propNumLabel.string="x"+Manager.propData.data[index].quantity.toString();
+      }
+      // 更新当前选中的道具数量文本
+      this.game.curPropContent.propNumLabel.string="x"+Manager.propData.data[this.game.curPropIndex].quantity.toString();
+      
       Manager.getInstance().post('https://api.xdiving.io/api/prop/consume',
       {propId:curPropIndex+1},
       (data) => {
@@ -539,6 +546,8 @@ export default class Player extends Component {
 
   boost(){
     if(this.consumeProp(2)){
+      
+      Sound.instance.boostAudio.play();
       this.boosting=2;
       this.setFastSpeed();
       
