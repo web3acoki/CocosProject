@@ -712,7 +712,7 @@ export class Manager extends Component {
         this.postTest("ready to initFakeUser");
         //this.getTest(4);
         Manager.initRequest= {initData:
-        "query_id=test123&user=%7B%22id%22%3A"+userId+"%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1662771648&hash=test"
+        "query_id=test123&user=%7B%22id%22%3A"+userId+"%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1662771648&hash=H5"
         }
         this.initUser();
     }

@@ -1,12 +1,29 @@
 import { _decorator, Component, Node, Button, director, WebView } from 'cc';
 import { Sound } from './Sound';
 import { Manager } from './Manager';
+import { Entry } from './Entry';
 const { ccclass, property } = _decorator;
 
 // 单例类
 @ccclass('PrivyLoad')
 export class PrivyLoad extends Component {
     private static instance: PrivyLoad | null = null;
+
+    // Privy 登录 URL 配置
+    // 设置为 true 使用正式版，false 使用测试版
+    public static useProductionUrl: boolean = true;
+    
+    // 正式版 URL
+    private static readonly PRODUCTION_URL: string = "https://game.xdiving.io/privy-connect";
+    // 测试版 URL
+    private static readonly TEST_URL: string = "https://imprescriptible-jonelle-riblike.ngrok-free.dev";
+    
+    /**
+     * 获取 Privy 登录 URL
+     */
+    public static getPrivyLoginUrl(): string {
+        return PrivyLoad.useProductionUrl ? PrivyLoad.PRODUCTION_URL : PrivyLoad.TEST_URL;
+    }
 
     // Privy 相关代码已注释
     // private privy: PrivyType | null = null;
@@ -20,17 +37,18 @@ export class PrivyLoad extends Component {
     // private readonly cdnUrl: string = 'https://cdn.jsdelivr.net/npm/@privy-io/js-sdk-core@latest/dist/index.js';
     // private readonly supportedChains: any = [...];
 
-    @property(Node)
-    telegramLoginButton: Node = null;
+    //@property(Entry)
+    //entry: Entry = null;
 
     @property(Node)
-    webViewNode: Node = null;
+    telegramLoginButton: Node = null;
 
     @property(WebView)
     webView: WebView = null;
 
     @property(Node)
     closeWebViewButton: Node = null;
+
 
     /**
      * 获取单例实例
@@ -98,8 +116,8 @@ export class PrivyLoad extends Component {
         }
 
         // 默认隐藏 WebView
-        if (this.webViewNode) {
-            this.webViewNode.active = false;
+        if (this.webView && this.webView.node) {
+            this.webView.node.active = false;
         }
         if (this.closeWebViewButton) {
             this.closeWebViewButton.active = false;
@@ -118,12 +136,22 @@ export class PrivyLoad extends Component {
      * 打开登录页面（使用 WebView）
      */
     public openLoginPage() {
-        const url = "https://roderick-oscular-cyril.ngrok-free.dev/";
+        const url = PrivyLoad.getPrivyLoginUrl();
         
-        if (this.webView && this.webViewNode) {
-            // 显示 WebView 节点
-            this.webViewNode.active = true;
+        if (this.webView && this.webView.node) {
+            // 确保 WebView 节点及其所有父节点都激活
             this.webView.node.active = true;
+            
+            // 确保父节点也激活
+            let parent = this.webView.node.parent;
+            let level = 0;
+            while (parent && level < 10) { // 限制层级避免无限循环
+                if (!parent.active) {
+                    parent.active = true;
+                }
+                parent = parent.parent;
+                level++;
+            }
             
             // 加载 URL
             this.webView.url = url;
@@ -135,7 +163,7 @@ export class PrivyLoad extends Component {
             
             console.log('Opening login page in WebView:', url);
         } else {
-            console.error('WebView or webViewNode not configured');
+            console.error('WebView not configured');
         }
     }
 
@@ -151,20 +179,41 @@ export class PrivyLoad extends Component {
         
         // 验证消息类型，确保是我们发送的
         if (data && data.type === 'PRIVY_LOGIN') {
-            const tgUserId = data.tgUserId;
+            const loginType = data.loginType || 'telegram'; // 'telegram' 或 'wallet'
+            const tgUserId = data.tgUserId || null;
+            const walletAddress = data.walletAddress || null;
+            const isSwitchAccount = data.isSwitchAccount || false; // 是否是切换账号
             
-            if (tgUserId) {
-                console.log("Cocos 成功接收到 Telegram ID:", tgUserId);
-                
-                // 调用 Manager 初始化用户
-                if (Manager.getInstance()) {
-                    Manager.getInstance().initFakeUser(tgUserId);
-                }
-                
+            // 判断登录类型并获取对应的用户标识
+            let userId: string | null = null;
+            if (loginType === 'telegram' && tgUserId) {
+                userId = tgUserId;
+                console.log("Cocos 成功接收到 Telegram ID:", tgUserId, "isSwitchAccount:", isSwitchAccount);
+            } else if (loginType === 'wallet' && walletAddress) {
+                userId = walletAddress;
+                console.log("Cocos 成功接收到钱包地址:", walletAddress, "isSwitchAccount:", isSwitchAccount);
+            }
+            
+            if (userId) {
                 // 登录成功，关闭 WebView
                 this.closeWebView();
+                
+                // 发送登录成功消息，让 Entry 场景处理
+                // 延迟发送，确保消息能被正确接收
+                this.scheduleOnce(() => {
+                    if (typeof window !== 'undefined') {
+                        window.postMessage({
+                            type: 'PRIVY_LOGIN_SUCCESS',
+                            loginType: loginType,
+                            tgUserId: tgUserId,
+                            walletAddress: walletAddress,
+                            userId: userId, // 统一的用户标识（TG用户ID或钱包地址）
+                            isSwitchAccount: isSwitchAccount
+                        }, '*');
+                    }
+                }, 0.1);
             } else {
-                console.warn('tgUserId not found in message data:', data);
+                console.warn('用户标识未找到，loginType:', loginType, 'tgUserId:', tgUserId, 'walletAddress:', walletAddress);
             }
         }
     }
@@ -184,9 +233,6 @@ export class PrivyLoad extends Component {
         if (this.webView && this.webView.node) {
             this.webView.node.active = false;
             this.webView.url = "";
-        }
-        if (this.webViewNode) {
-            this.webViewNode.active = false;
         }
     }
 

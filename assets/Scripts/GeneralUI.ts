@@ -1,6 +1,7 @@
-import { _decorator, Component, EditBox, Label, Node, ProgressBar, color, sys } from 'cc';
+import { _decorator, Component, EditBox, Label, Node, ProgressBar, color, sys, director } from 'cc';
 import { Manager } from './Manager';
 import { Sound } from './Sound';
+import { Entry } from './Entry';
 
 import { TelegramWebApp } from '../cocos-telegram-miniapps/scripts/telegram-web';
 const { ccclass, property } = _decorator;
@@ -54,6 +55,11 @@ export class GeneralUI extends Component {
     statusLabel:Label=null;
     @property(Label)
     connectLabel:Label=null;
+
+    @property(Node)
+    idNode:Node=null;
+    @property(Node)
+    webNode:Node=null;
 
     /**
      * 格式化数字：使用 K、M、B、T 等表示大数字，并用逗号分隔每3个数字
@@ -110,6 +116,11 @@ export class GeneralUI extends Component {
     }
 
     updateDisplay(){
+        
+        if(Manager.TGEnvironment){
+            this.webNode.active=false;
+        }
+        console.log(Manager.userData.data.coins);
         this.coins.string = this.formatNumber(Manager.userData.data.coins);
         this.diamonds.string=Manager.userData.data.diamonds.toString();
         this.userId.string="ID:"+Manager.userData.data.userId.toString();
@@ -286,12 +297,13 @@ export class GeneralUI extends Component {
         
         Sound.instance.buttonAudio.play();
         const shareUrl = "https://t.me/XDivingOfficial";
-        
+        sys.openURL(shareUrl);
         // 尝试使用 TelegramWebApp 的 openTelegramLink 方法
-        const success = TelegramWebApp.Instance.openTelegramLink(shareUrl);
-        if (!success) {
             // 如果 TelegramWebApp 未初始化或调用失败，使用备用方案
             if (Manager.TGEnvironment && window.Telegram && window.Telegram.WebApp) {
+                
+                const success = TelegramWebApp.Instance.openTelegramLink(shareUrl);
+                if (!success) {
                 // 使用 openLink 方法在 Telegram 内部打开链接，不会退出 mini app
                 if (typeof window.Telegram.WebApp.openLink === 'function') {
                     window.Telegram.WebApp.openLink(shareUrl);
@@ -446,6 +458,18 @@ export class GeneralUI extends Component {
                 this.failTimer=1;
             }
         }
+    }
+
+    connectTelegram(){
+        
+    }
+
+    SwitchAccount(){
+        Sound.instance.buttonAudio.play();
+        
+        // 设置标志，进入 Entry 场景
+        Entry.isSwitchAccount = true;
+        director.loadScene('Entry');
     }
 }
 
