@@ -153,7 +153,7 @@ interface setRequest{//设置
 }
 
 interface sellFishRequest{//卖鱼
-    userId:number;
+    userId:string;
     identifiers: string[];
 }
 
@@ -195,7 +195,7 @@ interface changeNameRequest{//修改名字
 //}
 
 interface EndRequest{//游戏结束
-    userId:number;
+    userId:string;
     catches:FishData[];
     //usedProps:PropData[];
     treasures:TreasureData[];
@@ -324,8 +324,10 @@ interface UserResponse{//用户其他数据
     data:User;
 }
 interface User{
-    userId:number;
+    userId:string;
+    telegramUserId:string;
     displayUsername:string;
+
     coins:number;
     diamonds:number;
     level:number;
@@ -476,6 +478,9 @@ export class Manager extends Component {
     public static loadFinish=0;
     
     public static accessToken:string;
+    
+    public static superAllow:boolean=false;//超级管理员是否允许
+    public static aquariumAllow:boolean=false;//水族馆是否允许
 
     // 钱包状态变化回调列表（供 GeneralUI 等组件注册）
     private static walletStatusChangeCallbacks: Array<() => void> = [];
@@ -513,6 +518,7 @@ export class Manager extends Component {
     private connectUI: TonConnectUI | null = null;
     private walletInitError: string | null = null;
     private walletInitErrorDetails: any = null;
+
 
     // private privy: PrivyClient | null = null;
     //public static
@@ -709,11 +715,21 @@ export class Manager extends Component {
  
     initFakeUser(userId){
         
-        this.postTest("ready to initFakeUser");
+        //this.postTest("ready to initFakeUser");
         //this.getTest(4);
         Manager.initRequest= {initData:
-        "query_id=test123&user=%7B%22id%22%3A"+userId+"%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1662771648&hash=H5"
+        "query_id=test123&user=%7B%22id%22%3A"+userId+"%2C%22first_name%22%3A%22John%22%2C%22last_name%22%3A%22Doe%22%2C%22username%22%3A%22johndoe%22%2C%22language_code%22%3A%22en%22%7D&auth_date=1662771648&hash=Test"
         }
+        this.initUser();
+    }
+
+    initWebUser(userId){
+        Manager.initRequest= {initData:"hash=PRIVY&user=%7B%22id%22%3A%22"+userId+"%22%7D"}
+        this.initUser();
+    }
+    
+    initWebUserWithType(userId,loginType){
+        Manager.initRequest= {initData:"hash=PRIVY&loginType="+loginType+"&user=%7B%22id%22%3A%22"+userId+"%22%7D"}
         this.initUser();
     }
 
@@ -842,7 +858,24 @@ export class Manager extends Component {
     initAquarium(){
         // 先重置 usedCapacity
         Manager.usedCapacity = 0;
-        
+        if(Manager.userData.data.userId === "6063502847"||
+            Manager.userData.data.userId === "7816429158"||
+            Manager.userData.data.userId === "7143498731"||
+            Manager.userData.data.userId === "6974811763"||
+            Manager.userData.data.userId === "7371874158"||
+            Manager.userData.data.userId === "5971871101"){
+            Manager.aquariumAllow=true;
+        }
+        else{
+            Manager.aquariumAllow=false;
+        }
+        if(Manager.userData.data.userId=="7816429158"||
+            Manager.userData.data.userId=="2006267752406708225"){
+            Manager.superAllow=true;
+        }
+        else{
+            Manager.superAllow=false;
+        }
         for(let index=0;index<Manager.aquariumFishData.data.length;index++){
             Manager.usedCapacity+=Manager.aquariumFishData.data[index].weight;
         }

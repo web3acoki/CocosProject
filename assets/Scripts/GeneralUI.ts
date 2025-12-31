@@ -56,10 +56,12 @@ export class GeneralUI extends Component {
     @property(Label)
     connectLabel:Label=null;
 
+    //@property(Node)
+    //idNode:Node=null;
     @property(Node)
-    idNode:Node=null;
+    switchNode:Node=null;
     @property(Node)
-    webNode:Node=null;
+    tgLabel:Label=null;
 
     /**
      * 格式化数字：使用 K、M、B、T 等表示大数字，并用逗号分隔每3个数字
@@ -118,7 +120,12 @@ export class GeneralUI extends Component {
     updateDisplay(){
         
         if(Manager.TGEnvironment){
-            this.webNode.active=false;
+            this.switchNode.active=false;
+        }
+        if(Manager.userData.data.telegramUserId==""){
+            this.tgLabel.string="Connect\nTelegram";
+        } else {
+            this.tgLabel.string="Group";
         }
         console.log(Manager.userData.data.coins);
         this.coins.string = this.formatNumber(Manager.userData.data.coins);
@@ -127,6 +134,7 @@ export class GeneralUI extends Component {
         this.playerName.string=Manager.userData.data.displayUsername;
         this.updateSetting();
         this.updateWalletStatus();
+        this.settingFrame.active=false;
     }
 
     // 更新钱包状态显示（从 Wallet.ts 迁移）
@@ -292,6 +300,13 @@ export class GeneralUI extends Component {
           }
         )
     }
+    TG(){
+        if(Manager.userData.data.telegramUserId==""){
+            this.connectTelegram();
+        } else {
+            this.jumpTG();
+        }
+    }
 
     jumpTG(){
         
@@ -317,6 +332,8 @@ export class GeneralUI extends Component {
             }
         }
     }
+
+
 
 
     jumpX(){
@@ -461,7 +478,9 @@ export class GeneralUI extends Component {
     }
 
     connectTelegram(){
-        
+        Sound.instance.buttonAudio.play();
+        const shareUrl = "https://t.me/xdiving_bot";
+        sys.openURL(shareUrl);
     }
 
     SwitchAccount(){

@@ -198,11 +198,19 @@ export class Level extends Component {
 
     openVIPFrame(){
         Sound.instance.buttonAudio.play();
+        
+        this.menu.comingSoonHide();
+        return;
+
         this.vipFrame.active=!this.vipFrame.active;
     }
 
     purchaseVIP(){
         Sound.instance.buttonAudio.play();
+        // 显示 coming soon
+        
+        // 以下代码暂时禁用，显示 coming soon
+        
         const accessToken = Manager.accessToken;
         const identifier=randomRangeInt(1000000000,9999999999);
         this.currentPurchaseIdentifier = identifier;
@@ -238,6 +246,7 @@ export class Level extends Component {
         );
 
         console.log(`正在加载支付页面...\n套餐ID: 10000`);
+        
     }
 
     

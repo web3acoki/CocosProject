@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Button, director, WebView } from 'cc';
+import { _decorator, Component, Node, Button, director, WebView, sys } from 'cc';
 import { Sound } from './Sound';
 import { Manager } from './Manager';
 import { Entry } from './Entry';
@@ -16,7 +16,7 @@ export class PrivyLoad extends Component {
     // 正式版 URL
     private static readonly PRODUCTION_URL: string = "https://game.xdiving.io/privy-connect";
     // 测试版 URL
-    private static readonly TEST_URL: string = "https://imprescriptible-jonelle-riblike.ngrok-free.dev";
+    private static readonly TEST_URL: string = "https://unrenounceable-promiscuously-cathie.ngrok-free.dev";
     
     /**
      * 获取 Privy 登录 URL
@@ -48,6 +48,9 @@ export class PrivyLoad extends Component {
 
     @property(Node)
     closeWebViewButton: Node = null;
+
+    // 充值相关回调函数
+    private depositCallback: ((result: any) => void) | null = null;
 
 
     /**
@@ -175,23 +178,25 @@ export class PrivyLoad extends Component {
         // 这里的 event.data 就是 Web 端传过来的对象
         const data = event.data;
         
-        console.log('Received message from WebView:', data);
+        //console.log('Received message from WebView:', data);
         
         // 验证消息类型，确保是我们发送的
         if (data && data.type === 'PRIVY_LOGIN') {
-            const loginType = data.loginType || 'telegram'; // 'telegram' 或 'wallet'
+            const loginType = data.loginType || 'telegram'; // 'telegram'、'wallet' 或 'email'
             const tgUserId = data.tgUserId || null;
             const walletAddress = data.walletAddress || null;
             const isSwitchAccount = data.isSwitchAccount || false; // 是否是切换账号
             
             // 判断登录类型并获取对应的用户标识
+            // 如果不是 TG 登录，统一使用钱包地址作为 userId
             let userId: string | null = null;
             if (loginType === 'telegram' && tgUserId) {
                 userId = tgUserId;
                 console.log("Cocos 成功接收到 Telegram ID:", tgUserId, "isSwitchAccount:", isSwitchAccount);
-            } else if (loginType === 'wallet' && walletAddress) {
+            } else if (walletAddress) {
+                // 非 TG 登录（email 或 wallet），统一使用钱包地址
                 userId = walletAddress;
-                console.log("Cocos 成功接收到钱包地址:", walletAddress, "isSwitchAccount:", isSwitchAccount);
+                console.log("Cocos 成功接收到钱包地址:", walletAddress, "登录类型:", loginType, "isSwitchAccount:", isSwitchAccount);
             }
             
             if (userId) {
@@ -207,13 +212,32 @@ export class PrivyLoad extends Component {
                             loginType: loginType,
                             tgUserId: tgUserId,
                             walletAddress: walletAddress,
-                            userId: userId, // 统一的用户标识（TG用户ID或钱包地址）
+                            userId: userId, // TG登录使用tgUserId，非TG登录使用walletAddress
                             isSwitchAccount: isSwitchAccount
                         }, '*');
                     }
                 }, 0.1);
             } else {
                 console.warn('用户标识未找到，loginType:', loginType, 'tgUserId:', tgUserId, 'walletAddress:', walletAddress);
+            }
+        } else if (data && data.type === 'DEPOSIT_SUCCESS') {
+            // 处理充值成功消息
+            const txHash = data.txHash || null;
+            const amount = data.amount || null;
+            
+            console.log('Cocos 收到充值成功消息:', { txHash, amount });
+            
+            // 关闭 WebView
+            this.closeWebView();
+            
+            // 调用回调函数
+            if (this.depositCallback) {
+                this.depositCallback({
+                    success: true,
+                    txHash: txHash,
+                    amount: amount
+                });
+                this.depositCallback = null; // 清除回调
             }
         }
     }
@@ -235,6 +259,82 @@ export class PrivyLoad extends Component {
             this.webView.url = "";
         }
     }
+
+    /**
+     * 打开充值页面并传递套餐ID
+     * @param identifier 充值套餐ID
+     * @param callback 充值成功后的回调函数
+     * @param webView 可选的 WebView 组件，如果不提供则使用实例的 webView
+     */
+    public openDepositPage(identifier: number, callback?: (result: any) => void, webView?: WebView) {
+        // 保存回调函数
+        this.depositCallback = callback || null;
+        
+        // 使用传入的 webView 或实例的 webView
+        const targetWebView = webView || this.webView;
+        
+        console.log('PrivyLoad: openDepositPage called, identifier =', identifier, 'webView =', targetWebView);
+        
+        if (!targetWebView) {
+            console.error('PrivyLoad: WebView not configured');
+            if (this.depositCallback) {
+                this.depositCallback({
+                    success: false,
+                    error: 'WebView not configured'
+                });
+                this.depositCallback = null;
+            }
+            return;
+        }
+        
+        if (!targetWebView.node) {
+            console.error('PrivyLoad: WebView.node is null');
+            if (this.depositCallback) {
+                this.depositCallback({
+                    success: false,
+                    error: 'WebView.node is null'
+                });
+                this.depositCallback = null;
+            }
+            return;
+        }
+        
+        const url = PrivyLoad.getPrivyLoginUrl();
+        console.log('PrivyLoad: Setting WebView URL to:', url);
+        
+        // 确保 WebView 节点及其所有父节点都激活（模仿 Entry.ts 的方式）
+        console.log('PrivyLoad: WebView node found, activating...');
+        targetWebView.node.active = true;
+        
+        // 确保父节点也激活
+        let parent = targetWebView.node.parent;
+        let level = 0;
+        while (parent && level < 10) { // 限制层级避免无限循环
+            if (!parent.active) {
+                console.log('PrivyLoad: Activating parent node at level', level, parent.name);
+                parent.active = true;
+            }
+            parent = parent.parent;
+            level++;
+        }
+        
+        // 通过 URL 参数传递套餐ID
+        const urlWithIdentifier = url + (url.includes('?') ? '&' : '?') + 'identifier=' + encodeURIComponent(identifier.toString());
+        
+        // 设置 URL（必须在节点激活后设置）
+        targetWebView.url = urlWithIdentifier;
+        
+        // 显示关闭按钮（如果存在）
+        if (this.closeWebViewButton) {
+            this.closeWebViewButton.active = true;
+        }
+        
+        console.log('PrivyLoad: Deposit page WebView opened, URL:', urlWithIdentifier);
+        console.log('PrivyLoad: WebView node active:', targetWebView.node.active);
+        console.log('PrivyLoad: WebView node visible:', targetWebView.node.isValid);
+    }
+
+    
 
     // ========== 以下所有 Privy 相关方法已注释 ==========
 

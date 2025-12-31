@@ -146,7 +146,7 @@ export class Menu extends Component {
         director.preloadScene("Aquarium");
         
         // 根据 userId 是否为 4 设置锁图标
-        if(Manager.userData.data.userId === 4){
+        if(Manager.aquariumAllow){
             this.lockNode.active = false;
         }
         else{
@@ -570,8 +570,13 @@ export class Menu extends Component {
     }
 
     topup(){
-        Sound.instance.buttonAudio.play();
-        director.loadScene("Topup");
+        if(Manager.superAllow){
+            Sound.instance.buttonAudio.play();
+            director.loadScene("Topup");
+        }
+        else{
+            this.comingSoonHide();
+        }
     }
 
     quest(){
@@ -579,15 +584,23 @@ export class Menu extends Component {
         director.loadScene("Quest");
     }
 
+    rank(){
+        if(Manager.superAllow){
+            Sound.instance.buttonAudio.play();
+            director.loadScene("Rank");
+        }
+        else{
+            this.comingSoonFrame.active=true;
+            this.comingSoonTimer=1;
+        }
+    }
+
     aquarium(){
-        Sound.instance.buttonAudio.play();
-        // 检查 userId 是否为 4
-        if(Manager.userData.data.userId === 4){
+        if(Manager.aquariumAllow){
+            Sound.instance.buttonAudio.play();
             director.loadScene("Aquarium");
         }
         else{
-            // 显示锁图标和 comingSoon
-            this.lockNode.active = true;
             this.comingSoonFrame.active=true;
             this.comingSoonTimer=1;
         }

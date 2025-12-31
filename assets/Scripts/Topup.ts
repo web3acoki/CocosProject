@@ -4,6 +4,8 @@ import { GeneralUI } from './GeneralUI';
 import { TopupContent } from './TopupContent';
 import { Manager } from './Manager';
 import { TelegramWebApp } from '../cocos-telegram-miniapps/scripts/telegram-web';
+import { TonPay, RechargeResult } from './TonPay';
+import { PrivyLoad } from './PrivyLoad';
 const { ccclass, property } = _decorator;
 
 @ccclass('Topup')
@@ -44,6 +46,9 @@ export class Topup extends Component {
     webViewPaymentNode: Node=null;
     @property(Node)
     linkPaymentNode: Node=null;
+
+    @property(WebView)
+    privyWebView: WebView=null;
 
     // 支付方式状态（4种组合，只能选中一种）
     // 1. 官网支付 + WebView: useWebsitePayment=true, webViewPayment=true
@@ -145,20 +150,52 @@ export class Topup extends Component {
             console.log(text); // 同时输出到控制台（如果有的话）
         };
         
-        // 根据支付方式选择（4种组合）
-        if (this.useWebsitePayment) {
-            // 官网支付（X Layer）
-            this.purchaseWithXLayer(topupContent, updateResult);
-        } else {
-            // TON Connect 支付
-            if (this.tonCoinPayment) {
-                // TON币支付
-                this.purchaseWithTON(topupContent, updateResult);
-            } else {
-                // TON链USDT支付（暂时禁用）
-                updateResult("TON链USDT支付功能暂时不可用");
-            }
+        //this.purchaseWithTONUSDT(topupContent, updateResult);
+
+        //this.purchaseWithTONUSDT(topupContent, updateResult);
+        if(Manager.TGEnvironment)
+        {
+            this.purchaseWithTON(topupContent, updateResult);
         }
+        else{
+            this.purchaseWithPrivy(topupContent, updateResult);
+        }
+        
+        //if(Manager.TGEnvironment)
+        // //{
+
+        
+        //     const tonpay = TonPay.getInstance();
+        //     if (tonpay) {
+        //         // 充值 10 USDT，套餐ID 为 1
+        //         tonpay.rechargeUSDT(
+        //             0.01,  // 金额
+        //             1,   // 套餐ID（可选）
+        //             updateResult
+        //         );
+        //     }
+
+
+            //this.purchaseWithTON(topupContent, updateResult);
+        //}
+        //else{
+        //    this.purchaseWithXLayer(topupContent, updateResult);
+        //}
+        
+        // 根据支付方式选择（4种组合）
+        //if (this.useWebsitePayment) {
+        //    // 官网支付（X Layer）
+        //    this.purchaseWithXLayer(topupContent, updateResult);
+        //} else {
+        //    // TON Connect 支付
+        //    if (this.tonCoinPayment) {
+        //        // TON币支付
+        //        this.purchaseWithTON(topupContent, updateResult);
+        //    } else {
+        //        // TON链USDT支付（暂时禁用）
+        //        updateResult("TON链USDT支付功能暂时不可用");
+        //    }
+        //}
     }
 
     // 打开官网支付（使用 WebView 内嵌）
@@ -172,7 +209,9 @@ export class Topup extends Component {
         }
         const identifier = randomRangeInt(1000000000,9999999999);
         this.currentPurchaseIdentifier = identifier;
-        const url = `https://xdiving.io?identifier=${identifier}&packageId=${packageId}&accessToken=${encodeURIComponent(accessToken)}`;
+        //const url = `https://xdiving.io?identifier=${identifier}&packageId=${packageId}&accessToken=${encodeURIComponent(accessToken)}`;
+
+        const url='https://game.xdiving.io/privy-connnect'
 
         // 使用 WebView 内嵌显示（复刻 Level.ts 的购买 VIP 逻辑）
         if (this.webView && this.webViewNode && this.webViewPayment) {
@@ -361,7 +400,217 @@ export class Topup extends Component {
         }
     }
 
-    // 使用 TON Connect 支付
+    // 使用 TON 链 USDT支付
+    private async purchaseWithTONUSDT(topupContent: TopupContent, updateResult: (text: string) => void) {
+        updateResult("Purchase: " + topupContent.identifier);
+        
+        // 检查钱包连接（与 purchaseWithTON 完全一致）
+        const manager = Manager.getInstance();
+        if (!manager || !manager.isWalletConnected()) {
+            updateResult("请先连接钱包");
+            
+            console.log("请先连接钱包");
+            this.connectWallet();
+            return;
+        }
+        
+        // 获取充值套餐信息
+        const topupData = Manager.topupBaseData.data[topupContent.identifier - 1];
+        const amount = topupData.priceUsdt; // USDT 金额
+        
+        console.log("开始发送USDT交易"+amount);
+        // USDT Jetton 主合约地址（TON 链上的 USDT）
+        const usdtJettonMaster = "0x779ded0c9e1022225f8e0630b35a9b54be713736";
+        const receiveAddress = "UQCe7p44GCOIZOntT9yZ1nqC-FFRvCKmezvCVasgiw3kWq5k"; // 收款地址
+        
+        // 发送 USDT Jetton 转账
+        try {
+            // 获取钱包地址（与 purchaseWithTON 一致，不提前返回）
+            const walletAddress = manager.getWalletAddress();
+
+            updateResult("正在获取 USDT Jetton 钱包地址...");
+            
+            // 获取用户的 USDT Jetton 钱包地址
+            const userJettonWalletAddress = await this.getUserJettonWalletAddress(walletAddress || "", usdtJettonMaster);
+            if (!userJettonWalletAddress) {
+                updateResult("错误: 无法获取用户的 USDT Jetton 钱包地址。\n请确保钱包中已持有 USDT Jetton。");
+                return;
+            }
+
+            updateResult("正在发送 USDT 交易...");
+            
+            // USDT 在 TON 链上使用 6 位小数
+            // 例如：1 USDT = 1,000,000 最小单位
+            const usdtDecimals = 6;
+            const amountInSmallestUnit = Math.floor(amount * Math.pow(10, usdtDecimals));
+            
+            // 构建 USDT Jetton 转账交易
+            // Jetton 转账需要向用户的 Jetton 钱包发送消息，而不是直接向收款地址发送
+            const tx = {
+                messages: [{
+                    address: userJettonWalletAddress, // 用户的 Jetton 钱包地址
+                    amount: "50000000", // 0.05 TON，用于支付 Gas 费用
+                    payload: "" // Jetton 转账 payload（需要正确构建，这里先留空）
+                }],
+                validUntil: Math.floor(Date.now() / 1000) + 300 // 5分钟后过期
+            };
+            
+            const result = await manager.sendTransaction(tx);
+            
+            // 获取充值信息
+            if (result && result.boc) {
+                let resultText = "========== 充值信息 ==========\n";
+                resultText += "交易已发送成功！\n";
+                resultText += "收款地址: " + receiveAddress + "\n";
+                resultText += "充值金额: " + amount + " USDT\n";
+                resultText += "充值套餐ID: " + topupContent.identifier + "\n";
+                resultText += "充值套餐类型: " + topupData.type + "\n";
+                resultText += "用户钱包地址: " + (walletAddress || "未知") + "\n";
+                resultText += "USDT Jetton 钱包地址: " + userJettonWalletAddress + "\n";
+                resultText += "交易boc: " + result.boc + "\n";
+                resultText += "交易哈希: " + (result.hash || "解析中...") + "\n";
+                
+                // 解析交易哈希
+                resultText += "\n正在解析交易哈希...\n";
+                updateResult(resultText);
+                
+                const txHash = await manager.parseTransactionHash(result.boc);
+                if (txHash) {
+                    resultText += "交易哈希: " + txHash + "\n";
+                    resultText += "交易查看: https://tonscan.org/tx/" + txHash + "\n";
+                } else {
+                    resultText += "提示: 交易哈希解析中，可能需要等待几秒钟后查询地址交易历史\n";
+                }
+                
+                resultText += "==============================";
+                updateResult(resultText);
+            } else {
+                updateResult("交易结果异常: " + JSON.stringify(result));
+            }
+        } catch (error) {
+            updateResult("发送交易失败: " + (error?.toString() || String(error)));
+        }
+    }
+
+    /**
+     * 获取用户的 USDT Jetton 钱包地址
+     * 每个用户在 TON 链上对于每个 Jetton 都有一个独立的钱包地址
+     */
+    private async getUserJettonWalletAddress(userAddress: string, jettonMaster: string): Promise<string | null> {
+        try {
+            // 方法1: 通过 TON API 查询用户的 Jetton 钱包地址
+            // 使用 tonapi.io 查询用户的 Jetton 余额，从中找到 USDT Jetton 钱包地址
+            const response = await fetch(
+                `https://tonapi.io/v2/accounts/${encodeURIComponent(userAddress)}/jettons`
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.balances && Array.isArray(data.balances)) {
+                    // 查找 USDT Jetton
+                    const usdtJetton = data.balances.find((jetton: any) => {
+                        return jetton.jetton && 
+                               jetton.jetton.address === jettonMaster;
+                    });
+                    
+                    if (usdtJetton && usdtJetton.wallet_address) {
+                        return usdtJetton.wallet_address.address;
+                    }
+                }
+            }
+
+            // 方法2: 如果 API 查询失败，尝试通过后端 API 计算 Jetton 钱包地址
+            // Jetton 钱包地址可以通过用户地址和 Jetton Master 地址计算出来
+            try {
+                const backendResponse = await fetch(`https://api.xdiving.io/api/ton/jetton-wallet-address`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        userAddress: userAddress,
+                        jettonMaster: jettonMaster 
+                    })
+                });
+                
+                if (backendResponse.ok) {
+                    const backendData = await backendResponse.json();
+                    if (backendData.walletAddress) {
+                        console.log("通过后端 API 获取到 Jetton 钱包地址:", backendData.walletAddress);
+                        return backendData.walletAddress;
+                    }
+                }
+            } catch (backendError) {
+                console.warn("后端 API 获取 Jetton 钱包地址失败:", backendError);
+            }
+
+            // 方法3: 如果以上都失败，返回 null
+            console.warn("无法获取 Jetton 钱包地址，用户可能需要先持有 USDT 或联系后端支持");
+            return null;
+        } catch (error) {
+            console.error("获取 Jetton 钱包地址失败:", error);
+            return null;
+        }
+    }
+    private async purchaseWithPrivy(topupContent: TopupContent, updateResult: (text: string) => void) {
+        updateResult("Purchase: " + topupContent.identifier);
+        
+        // 获取充值套餐信息
+        const topupData = Manager.topupBaseData.data[topupContent.identifier - 1];
+        
+        // 获取 PrivyLoad 实例
+        const privyLoad = PrivyLoad.getInstance();
+        if (!privyLoad) {
+            updateResult("错误: PrivyLoad 未初始化");
+            return;
+        }
+        
+        // 检查 WebView 是否配置
+        if (!this.privyWebView) {
+            updateResult("错误: Privy WebView 未配置");
+            return;
+        }
+        
+        // 显示 WebView 节点（如果存在）
+        if (this.webViewPaymentNode) {
+            this.webViewPaymentNode.active = true;
+        }
+        
+        // 打开充值页面并传递套餐ID（传递 Topup 场景的 privyWebView，模仿 Entry 的方式）
+        privyLoad.openDepositPage(topupContent.identifier, (result) => {
+            if (result.success) {
+                // 充值成功
+                let resultText = "========== 充值信息 ==========\n";
+                resultText += "充值成功！\n";
+                resultText += "交易哈希: " + (result.txHash || "N/A") + "\n";
+                resultText += "充值金额: " + (result.amount || topupData.priceUsdt.toString()) + " USDT\n";
+                resultText += "充值套餐ID: " + topupContent.identifier + "\n";
+                resultText += "充值套餐类型: " + topupData.type + "\n";
+                resultText += "========== 充值信息 ==========";
+                updateResult(resultText);
+                
+                // 隐藏 WebView
+                if (this.webViewPaymentNode) {
+                    this.webViewPaymentNode.active = false;
+                }
+                if (this.privyWebView && this.privyWebView.node) {
+                    this.privyWebView.node.active = false;
+                }
+            } else {
+                // 充值失败
+                updateResult("充值失败: " + (result.error || "未知错误"));
+                
+                // 隐藏 WebView
+                if (this.webViewPaymentNode) {
+                    this.webViewPaymentNode.active = false;
+                }
+                if (this.privyWebView && this.privyWebView.node) {
+                    this.privyWebView.node.active = false;
+                }
+            }
+        }, this.privyWebView);
+    }
+    // 使用 TON Connect 支付toncoin
     private async purchaseWithTON(topupContent: TopupContent, updateResult: (text: string) => void) {
         updateResult("Purchase: " + topupContent.identifier);
         
@@ -379,9 +628,12 @@ export class Topup extends Component {
         
         // 测试：发送 TON 转账
         try {
-            const receiveAddress = "UQDiN5m0Yky67vaeKWuMkQoqnz7ksxJcK0IVSCvEtm7cJYh1"; // TON测试收款地址
+            
+            //const tbnbAddress = "0x7bcce2ec0495603e736da75bd564b45d38825839"; // TBNB测试地址
+            //const usdtJettonMaster = "EQD0vdSA_NedR9uvbgO9EiefRV466c4YvEkOzkYwpewj1Vqo";
             //const usdtJettonMaster = "0x779ded0c9e1022225f8e0630b35a9b54be713736"; // USDT Jetton 主合约
-            const tbnbAddress = "0x7bcce2ec0495603e736da75bd564b45d38825839"; // TBNB测试地址
+            //const receiveAddress = "UQCe7p44GCOIZOntT9yZ1nqC-FFRvCKmezvCVasgiw3kWq5k";
+            const receiveAddress = "UQDiN5m0Yky67vaeKWuMkQoqnz7ksxJcK0IVSCvEtm7cJYh1"; // TON测试收款地址
             
             
             updateResult("正在发送交易...");

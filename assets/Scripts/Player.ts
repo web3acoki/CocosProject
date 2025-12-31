@@ -297,7 +297,7 @@ export default class Player extends Component {
 
   confirm=false;//确认死亡
 
-  userId=1;
+  userId="1";
 
   catchSwordfish=false;
 
@@ -343,7 +343,7 @@ export default class Player extends Component {
           console.log(`'开始数据POST失败: ${error}`);
       }
     )
-    Manager.endData={userId:1,catches:[],treasures:[],maxDepth:0,endReason:"",mainPropId:1};
+    Manager.endData={userId:"1",catches:[],treasures:[],maxDepth:0,endReason:"",mainPropId:1};
     //Manager.endData.usedProps.push({propId:1,quantity:0});
     this.harpoonOrigin=this.harpoon.getPosition();
     this.ropeUT=this.rope.getComponent(UITransform);
@@ -946,6 +946,13 @@ export default class Player extends Component {
       if(Manager.questData.data[index].progress>=Manager.questBaseData.data[index].quantity){
         Manager.questData.data[index].questStatus=3;
       }
+      
+      // 更新游戏中的任务进度显示
+      if (this.game) {
+        const quest = Manager.questData.data[index];
+        this.game.updateQuestProgress(index, quest.progress);
+      }
+      
       const questData = { identifier: index+9006};
       Manager.getInstance().post('https://api.xdiving.io/api/quest/user/progress',
       questData,

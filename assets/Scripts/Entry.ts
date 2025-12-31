@@ -244,7 +244,7 @@ export class Entry extends Component {
     private handleLoginMessage(event: MessageEvent) {
         const data = event.data;
         
-        console.log('Entry scene received message:', data);
+        //console.log('Entry scene received message:', data);
         
         // 验证消息类型
         if (data && data.type === 'PRIVY_LOGIN_SUCCESS') {
@@ -275,11 +275,10 @@ export class Entry extends Component {
                 }
                 
                 // 初始化用户
-                // 注意：无论是TG用户ID还是钱包地址，都作为userId传给initFakeUser
-                // 后端会根据传入的值判断是TG用户ID还是钱包地址，并返回真正的userId
+                // 使用 initWebUserWithType，userId 和 loginType 完全由 privy 中获取
                 if (Manager.getInstance()) {
                     Manager.loadFinish = 0;
-                    Manager.getInstance().initFakeUser(userId);
+                    Manager.getInstance().initWebUserWithType(userId, loginType);
                     
                     // 等待数据加载完成后进入主菜单
                     this.waitForDataAndEnterMenu();

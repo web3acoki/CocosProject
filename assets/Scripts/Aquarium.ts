@@ -269,7 +269,7 @@ export class Aquarium extends Component {
             console.log("detailContent.needFeedCount:", detailContent.needFeedCount);
             console.log("detailContent.feedCount:", detailContent.feedCount);
             if(detailContent.needFeedCount>detailContent.feedCount){
-                detailContent.remainingSatiety = liveLife - detailContent.totalSatiety*detailContent.feedCount;
+                detailContent.remainingSatiety =detailContent.totalSatiety*(detailContent.feedCount+2)-liveLife;
             }
             else{
                 detailContent.remainingSatiety = detailContent.totalSatiety;

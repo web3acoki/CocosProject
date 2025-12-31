@@ -127,7 +127,7 @@ export class Box extends Component {
         this.remainKG=Manager.aquariumBaseData.data[Manager.aquariumLevelData.data.level-1].capacity-Manager.usedCapacity;
         
         // 根据 userId 是否为 4 设置 lock 和 kgNumLabel 的显示
-        let canUseAquarium = Manager.userData && Manager.userData.data && Manager.userData.data.userId === 4;
+        let canUseAquarium = Manager.userData && Manager.userData.data && Manager.aquariumAllow;
         if(canUseAquarium){
             // userId 为 4：lock 不显示，kgNumLabel 显示
             if(this.lockNode){
@@ -262,7 +262,7 @@ export class Box extends Component {
     deposit(){//存鱼
         
         // 如果 userId 不为 4，不执行功能
-        if(!Manager.userData || !Manager.userData.data || Manager.userData.data.userId !== 4){
+        if(!Manager.userData || !Manager.userData.data || !Manager.aquariumAllow){
             return;
         }
         if(this.totalKG>this.remainKG){

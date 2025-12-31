@@ -7,6 +7,8 @@ import { GeneralUI } from './GeneralUI';
 import { GameContent } from './GameContent';
 import { Sound } from './Sound';
 import Player from './Player';
+import { gameQuestContent } from './gameQuestContent';
+import { QuestContent } from './QuestContent';
 const { ccclass, property } = _decorator;
 
 
@@ -79,6 +81,10 @@ export class Game extends Component {
     @property(Node)
     redOxygen:Node=null;
 
+    @property(Node)
+    questNode:Node=null;
+    @property(Prefab)
+    questContentPrefab:Prefab=null;
     //@property(Label)
     //userId: Label = null;
     //@property(Label)
@@ -94,9 +100,12 @@ export class Game extends Component {
         this.mask.enabled=true;
         this.generalUI.updateDisplay();
         this.generalUI.updateLevel();
+        
+        // 初始化游戏中的任务显示
+        this.initGameQuests();
 
 
-        for(let index=0;index<this.choosePropNode.children.length;index++){
+        for(let index=0;index<this.choosePropNode.children.length;index++){//生成道具
           let gameContent = this.choosePropNode.children[index].getComponent(GameContent);
           gameContent.index = index;
           gameContent.game = this;
@@ -260,6 +269,118 @@ export class Game extends Component {
                 fishInstance.setPosition(newPos);
                 //this.fishes.push(fishInstance);
                 this.fishesNode.addChild(fishInstance);
+            }
+        }
+    }
+    
+    /**
+     * 初始化游戏中的任务显示
+     * 如果任务状态为2（正在进行中）且ID为0,2,4,6,8,9,10,11,12，则生成对应的questContent
+     */
+    initGameQuests() {
+        if (!this.questNode || !this.questContentPrefab || !Manager.questData) {
+            console.warn('Game: questNode, questContentPrefab or questData not configured');
+            return;
+        }
+        
+        // 任务ID到fish images索引的映射
+        const questIdToFishImageMap: { [key: number]: number } = {
+            0: 0,
+            2: 2,
+            4: 6,
+            6: 11,
+            8: 10,
+            9: 4,
+            10: 5,
+            11: 7,
+            12: 9
+        };
+        
+        // 遍历任务数据
+        for (let i = 0; i < Manager.questData.data.length; i++) {
+            const quest = Manager.questData.data[i];
+            
+            console.log(i);
+            // 检查任务状态是否小于3（正在进行中）且ID在映射表中
+            if (quest.questStatus <3 && questIdToFishImageMap.hasOwnProperty(i)) {
+                const fishImageIndex = questIdToFishImageMap[i];
+                
+              console.log(fishImageIndex);
+                // 检查fish images索引是否有效
+                if (fishImageIndex >= 0 && fishImageIndex < this.fishImages.length) {
+                    // 创建questContent实例
+                    const questContentInstance = instantiate(this.questContentPrefab);
+                    // 尝试获取 gameQuestContent 组件（如果存在）
+                    let questContentComponent = questContentInstance.getComponent(gameQuestContent);
+                    // 如果不存在，尝试获取 QuestContent 组件
+                    if (!questContentComponent) {
+                        const questContent = questContentInstance.getComponent(QuestContent);
+                        if (questContent && questContent.sprite) {
+                            questContent.sprite.spriteFrame = this.fishImages[fishImageIndex];
+                        }
+                        if (questContent && questContent.progressLabel) {
+                            // 使用 (progress/quantity) 格式，参考 Quest 脚本
+                            const quantity = Manager.questBaseData.data[i].quantity;
+                            questContent.progressLabel.string = "(" + quest.progress.toString() + "/" + quantity.toString() + ")";
+                        }
+                    } else {
+                        // 使用 gameQuestContent 组件
+                        if (questContentComponent.sprite) {
+                            questContentComponent.sprite.spriteFrame = this.fishImages[fishImageIndex];
+                        }
+                        if (questContentComponent.progressLabel) {
+                            // 使用 (progress/quantity) 格式，参考 Quest 脚本
+                            const quantity = Manager.questBaseData.data[i].quantity;
+                            questContentComponent.progressLabel.string = "(" + quest.progress.toString() + "/" + quantity.toString() + ")";
+                        }
+                    }
+                    
+                    // 存储任务ID到节点，方便后续更新
+                    questContentInstance['questId'] = i;
+                    
+                    // 添加到questNode
+                    this.questNode.addChild(questContentInstance);
+                    
+                    console.log(`Game: Created questContent for quest ID ${i}, fish image index ${fishImageIndex}, progress ${quest.progress}`);
+                } else {
+                    console.warn(`Game: Invalid fish image index ${fishImageIndex} for quest ID ${quest.identifier}`);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 更新任务进度显示
+     * @param questId 任务ID
+     * @param progress 新的进度值
+     */
+    updateQuestProgress(questId: number, progress: number) {
+        if (!this.questNode) {
+            return;
+        }
+        
+        // 遍历 questNode 的子节点，找到对应的任务
+        for (let i = 0; i < this.questNode.children.length; i++) {
+            const child = this.questNode.children[i];
+            if (child['questId'] === questId) {
+                // 获取任务的目标数量
+                const quantity = Manager.questBaseData.data[questId].quantity;
+                const progressText = "(" + progress.toString() + "/" + quantity.toString() + ")";
+                
+                // 尝试更新 gameQuestContent
+                const gameQuestComp = child.getComponent(gameQuestContent);
+                if (gameQuestComp && gameQuestComp.progressLabel) {
+                    gameQuestComp.progressLabel.string = progressText;
+                    console.log(`Game: Updated quest ${questId} progress to ${progressText}`);
+                    return;
+                }
+                // 尝试更新 QuestContent
+                const questComp = child.getComponent(QuestContent);
+                if (questComp && questComp.progressLabel) {
+                    questComp.progressLabel.string = progressText;
+                    console.log(`Game: Updated quest ${questId} progress to ${progressText}`);
+                    return;
+                }
             }
         }
     }
