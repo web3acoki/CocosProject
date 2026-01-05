@@ -589,6 +589,12 @@ export class Topup extends Component {
                 resultText += "========== 充值信息 ==========";
                 updateResult(resultText);
                 
+                // 如果奖励已发放，更新 UI
+                if (result.rewardsGranted && this.generalUI) {
+                    this.generalUI.updateDisplay();
+                    console.log('Topup: 奖励已发放，UI已更新');
+                }
+                
                 // 隐藏 WebView
                 if (this.webViewPaymentNode) {
                     this.webViewPaymentNode.active = false;

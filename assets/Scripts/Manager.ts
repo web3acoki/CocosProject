@@ -733,6 +733,11 @@ export class Manager extends Component {
         this.initUser();
     }
 
+    initWebUserWithInviteCode(userId,loginType,inviteCode){
+        Manager.initRequest= {initData:"hash=PRIVY&loginType="+loginType+"&start_param="+inviteCode+"&user=%7B%22id%22%3A%22"+userId+"%22%7D"}
+        this.initUser();
+    }
+
     initUser(){
         this.post('https://api.xdiving.io/api/game/init',
         Manager.initRequest,
@@ -828,7 +833,7 @@ export class Manager extends Component {
     }
 
     initLevel(){
-   // 先清空数组
+    // 先清空数组
         Manager.levelStatusDatas = [];
         
         for(let index=0;index<Manager.levelBaseData.data.length;index++){

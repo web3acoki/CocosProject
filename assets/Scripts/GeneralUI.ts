@@ -127,7 +127,7 @@ export class GeneralUI extends Component {
         } else {
             this.tgLabel.string="Group";
         }
-        console.log(Manager.userData.data.coins);
+        //console.log(Manager.userData.data.coins);
         this.coins.string = this.formatNumber(Manager.userData.data.coins);
         this.diamonds.string=Manager.userData.data.diamonds.toString();
         this.userId.string="ID:"+Manager.userData.data.userId.toString();

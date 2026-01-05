@@ -48,7 +48,12 @@ export class Referral extends Component {
         this.generalUI.updateDisplay();
         director.preloadScene("Menu");
         this.numLabel.string="Friend List("+Manager.inviteUserData.data.length.toString()+")";
-        this.url="https://t.me/xdiving_bot/xdiving_bot?startapp="+Manager.inviteCodeData.data.invitationCode;
+        if(Manager.TGEnvironment){
+            this.url="https://t.me/xdiving_bot/xdiving_bot?startapp="+Manager.inviteCodeData.data.invitationCode;
+        }
+        else{
+            this.url="https://game.xdiving.io?startapp="+Manager.inviteCodeData.data.invitationCode;
+        }
         this.linkLabel.string=this.url;
         //this.updateSound();
     }
@@ -182,14 +187,14 @@ export class Referral extends Component {
         // sys.openURL(jumpUrl);
         
         // 新方法：使用 Telegram WebApp API，不会退出 mini app
-        const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(this.url);
+        //const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(this.url);
         
         // 检查是否在 Telegram 环境
         if (Manager.TGEnvironment) {
-            window.Telegram.WebApp.openTelegramLink(shareUrl);
+            window.Telegram.WebApp.openTelegramLink(this.url);
         } else {
             // 非 Telegram 环境的备用方案
-            sys.openURL(shareUrl);
+            sys.openURL(this.url);
         }
     }
 }

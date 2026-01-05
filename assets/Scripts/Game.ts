@@ -104,7 +104,6 @@ export class Game extends Component {
         // 初始化游戏中的任务显示
         this.initGameQuests();
 
-
         for(let index=0;index<this.choosePropNode.children.length;index++){//生成道具
           let gameContent = this.choosePropNode.children[index].getComponent(GameContent);
           gameContent.index = index;
@@ -300,7 +299,6 @@ export class Game extends Component {
         for (let i = 0; i < Manager.questData.data.length; i++) {
             const quest = Manager.questData.data[i];
             
-            console.log(i);
             // 检查任务状态是否小于3（正在进行中）且ID在映射表中
             if (quest.questStatus <3 && questIdToFishImageMap.hasOwnProperty(i)) {
                 const fishImageIndex = questIdToFishImageMap[i];

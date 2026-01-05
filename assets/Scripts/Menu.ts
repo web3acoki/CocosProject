@@ -497,7 +497,6 @@ export class Menu extends Component {
                   this.goFishingSprite.color=new Color(color.a,color.g,color.b,128);
                   
                   this.step = 1;
-//
                   this.walkMan.setPosition(this.manOrigin.clone().add(this.manOffset));
                   
                   this.standMan.active = false;
@@ -570,7 +569,7 @@ export class Menu extends Component {
     }
 
     topup(){
-        if(Manager.superAllow){
+        if(Manager.superAllow||1){
             Sound.instance.buttonAudio.play();
             director.loadScene("Topup");
         }
@@ -585,14 +584,8 @@ export class Menu extends Component {
     }
 
     rank(){
-        if(Manager.superAllow){
-            Sound.instance.buttonAudio.play();
-            director.loadScene("Rank");
-        }
-        else{
-            this.comingSoonFrame.active=true;
-            this.comingSoonTimer=1;
-        }
+        Sound.instance.buttonAudio.play();
+        director.loadScene("Rank");
     }
 
     aquarium(){

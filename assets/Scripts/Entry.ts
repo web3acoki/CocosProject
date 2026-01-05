@@ -17,6 +17,9 @@ export class Entry extends Component {
     // 是否正在等待切换账号后的新登录信息
     private isWaitingForNewAccount: boolean = false;
 
+    // 从 URL 参数中获取的邀请码
+    private inviteCode: string | null = null;
+
     @property(ProgressBar)
     pBar:ProgressBar=null;
 
@@ -51,6 +54,12 @@ export class Entry extends Component {
         // 监听全局消息事件，接收 Privy 登录成功消息
         if (typeof window !== 'undefined') {
             window.addEventListener('message', this.handleLoginMessage.bind(this));
+        }
+
+        // 从 URL 参数中获取邀请码
+        this.inviteCode = this.getInviteCodeFromURL();
+        if (this.inviteCode) {
+            console.log('Entry: 检测到邀请码:', this.inviteCode);
         }
 
         // 检查是否是 TG 环境
@@ -239,6 +248,25 @@ export class Entry extends Component {
     }
 
     /**
+     * 从 URL 参数中获取邀请码（startapp 参数）
+     */
+    private getInviteCodeFromURL(): string | null {
+        if (typeof window === 'undefined' || !window.location) {
+            return null;
+        }
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            console.log('Entry: URL 参数:', urlParams);
+            const inviteCode = urlParams.get('startapp');
+            return inviteCode;
+        } catch (error) {
+            console.error('Entry: 解析 URL 参数失败:', error);
+            return null;
+        }
+    }
+
+    /**
      * 处理登录成功消息
      */
     private handleLoginMessage(event: MessageEvent) {
@@ -275,10 +303,17 @@ export class Entry extends Component {
                 }
                 
                 // 初始化用户
-                // 使用 initWebUserWithType，userId 和 loginType 完全由 privy 中获取
+                // 使用 initWebUserWithType 或 initWebUserWithInviteCode，userId 和 loginType 完全由 privy 中获取
                 if (Manager.getInstance()) {
                     Manager.loadFinish = 0;
-                    Manager.getInstance().initWebUserWithType(userId, loginType);
+                    if (this.inviteCode) {
+                        // 有邀请码，使用带邀请码的初始化
+                        console.log('Entry: 使用邀请码初始化，邀请码:', this.inviteCode);
+                        Manager.getInstance().initWebUserWithInviteCode(userId, loginType, this.inviteCode);
+                    } else {
+                        // 无邀请码，使用普通初始化
+                        Manager.getInstance().initWebUserWithType(userId, loginType);
+                    }
                     
                     // 等待数据加载完成后进入主菜单
                     this.waitForDataAndEnterMenu();
